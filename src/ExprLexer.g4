@@ -11,6 +11,9 @@ LPAREN : '(' ;
 RPAREN : ')' ;
 LCURLY : '{' ;
 RCURLY : '}' ;
+SIMULATE: 'simulate';
+ROUNDS: 'rounds';
+
 
 INT : [0-9]+ ;
 ID: [a-zA-Z_][a-zA-Z_0-9]* ;
