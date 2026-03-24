@@ -1,8 +1,10 @@
-import engine.BlackjackGame;
-import engine.Deck;
-import sim.SimulationConfig;
-import sim.SimulationResult;
-import sim.SimulationRunner;
+import blackjack.engine.BlackjackGame;
+import blackjack.engine.Deck;
+import blackjack.sim.SimulationConfig;
+import blackjack.sim.SimulationResult;
+import blackjack.sim.SimulationRunner;
+import blackjack.strategy.BasicStrategyConfig;
+import blackjack.strategy.Strategy;
 
 public class BooleanVisitor extends ExprParserBaseVisitor<String> {
 
@@ -23,7 +25,8 @@ public class BooleanVisitor extends ExprParserBaseVisitor<String> {
 
         Deck deck = new Deck();
         BlackjackGame game = new BlackjackGame(deck);
-        SimulationRunner runner = new SimulationRunner(config, game);
+        Strategy strategy = BasicStrategyConfig.create();
+        SimulationRunner runner = new SimulationRunner(config, game, strategy);
         SimulationResult result = runner.run();
 
         return "Simulated " + rounds + " rounds -> "
