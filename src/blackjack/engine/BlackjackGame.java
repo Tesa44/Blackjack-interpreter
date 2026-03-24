@@ -81,9 +81,7 @@ public class BlackjackGame {
             if (hand.getBestValue() > 21) {
                 return hand;
             }
-//            if (shouldStandOnSoft17OrMore(hand)) {
-//                return hand;
-//            }
+
 
             Action action = strategy.decide(hand, dealerUpcard);
             System.out.println("ACTION: " + action.name());
@@ -103,36 +101,6 @@ public class BlackjackGame {
                 }
             }
         }
-    }
-
-    private boolean shouldStandOnSoft17OrMore(Hand hand) {
-        int best = hand.getBestValue();
-        if (best <= 16 || best > 21) {
-            return false;
-        }
-
-        int lowTotal = 0;
-        boolean hasAce = false;
-        for (Card card : hand.getCards()) {
-            switch (card.getRank()) {
-                case TWO -> lowTotal += 2;
-                case THREE -> lowTotal += 3;
-                case FOUR -> lowTotal += 4;
-                case FIVE -> lowTotal += 5;
-                case SIX -> lowTotal += 6;
-                case SEVEN -> lowTotal += 7;
-                case EIGHT -> lowTotal += 8;
-                case NINE -> lowTotal += 9;
-                case TEN, JACK, QUEEN, KING -> lowTotal += 10;
-                case ACE -> {
-                    lowTotal += 1;
-                    hasAce = true;
-                }
-            }
-        }
-
-        // If best equals low-total+10, one Ace is currently being counted as 11.
-        return hasAce && (lowTotal + 10 == best);
     }
 
     private void playDealer() {
