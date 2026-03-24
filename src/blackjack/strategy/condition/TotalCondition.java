@@ -10,6 +10,10 @@ public class TotalCondition implements PlayerCondition {
         this.minInclusive = minInclusive;
         this.maxInclusive = maxInclusive;
     }
+    public TotalCondition(int inclusive) {
+        this.minInclusive = inclusive;
+        this.maxInclusive = inclusive;
+    }
 
     @Override
     public boolean matches(Hand hand) {

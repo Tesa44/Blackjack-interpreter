@@ -1,1 +1,1 @@
-simulate 1000 rounds;
+simulate 5 rounds;

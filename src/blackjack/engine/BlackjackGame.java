@@ -6,6 +6,11 @@ import blackjack.strategy.Strategy;
 import java.util.ArrayList;
 import java.util.List;
 
+
+//TODO: Fix results when player's action is SPLIT.
+// We should delete Final result and add separated results
+
+
 public class BlackjackGame {
     private final Deck deck;
     private final Hand dealerHand = new Hand();
@@ -58,6 +63,7 @@ public class BlackjackGame {
         List<Hand> result = new ArrayList<>();
 
         Action first = strategy.decide(initialHand, dealerUpcard);
+        System.out.println("ACTION: " + first.name());
         if (first == Action.SPLIT && initialHand.isPair()) {
             Hand h1 = new Hand();
             Hand h2 = new Hand();
@@ -96,7 +102,8 @@ public class BlackjackGame {
                     return hand;
                 }
                 case SPLIT -> {
-                    // No recursive splitting. If a split is requested here, treat as HIT.
+                    //TODO: consider recursive splitting
+                    //No recursive splitting. If a split is requested here, treat as HIT.
                     hand.addCard(deck.draw());
                 }
             }

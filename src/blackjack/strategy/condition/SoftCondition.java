@@ -7,9 +7,8 @@ import blackjack.engine.Rank;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * Matches "soft" two-card hands such as A+2, A+3, etc.
- */
+//TODO: Replace Rank with card value
+
 public class SoftCondition implements PlayerCondition {
     private final Set<Rank> otherRanks;
 

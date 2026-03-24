@@ -5,6 +5,8 @@ import blackjack.engine.Hand;
 import java.util.ArrayList;
 import java.util.List;
 
+//TODO: Adapt this class for DealerCondition
+
 public class CompositeCondition implements PlayerCondition {
     private final List<PlayerCondition> conditions;
 
