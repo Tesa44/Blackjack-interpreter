@@ -15,7 +15,7 @@ public class BlackjackGame {
     private final Deck deck;
     private final Hand dealerHand = new Hand();
 
-    private RoundResult lastResult;
+    private Result lastResult;
 
     public BlackjackGame(Deck deck) {
         this.deck = deck;
@@ -29,23 +29,23 @@ public class BlackjackGame {
         return dealerHand;
     }
 
-    public RoundResult getLastResult() {
+    public Result getLastResult() {
         return lastResult;
     }
 
-    public RoundResult playRound(Strategy strategy) {
+    public Result playRound(Strategy strategy) {
         Hand initialPlayerHand = new Hand();
         startRound(initialPlayerHand);
 
         Card dealerUpcard = dealerHand.getCard(0);
-        System.out.println("=== Round Summary ===");
-        System.out.println("Player sees " + dealerUpcard.toString() + " dealer's card");
-        System.out.println("Player cards" + formatHand(initialPlayerHand));
+
         List<Hand> finalPlayerHands = playPlayerHands(initialPlayerHand, dealerUpcard, strategy);
         playDealer();
 
-        lastResult = evaluateMany(finalPlayerHands);
-        printRoundSummary(finalPlayerHands, lastResult, strategy);
+        RoundResult roundResult = new RoundResult(dealerHand, finalPlayerHands, )
+
+        lastResult = evaluateRound(finalPlayerHands);
+        printRoundSummary(finalPlayerHands, lastResult);
         return lastResult;
     }
 
@@ -63,7 +63,6 @@ public class BlackjackGame {
         List<Hand> result = new ArrayList<>();
 
         Action first = strategy.decide(initialHand, dealerUpcard);
-        System.out.println("ACTION: " + first.name());
         if (first == Action.SPLIT && initialHand.isPair()) {
             Hand h1 = new Hand();
             Hand h2 = new Hand();
@@ -116,100 +115,6 @@ public class BlackjackGame {
         }
     }
 
-    private RoundResult evaluateMany(List<Hand> playerHands) {
-        int dealerValue = dealerHand.getBestValue();
-        boolean dealerBust = dealerValue > 21;
 
-        boolean anyPlayerWin = false;
-        boolean anyDealerWin = false;
-
-        for (Hand playerHand : playerHands) {
-            RoundResult r = evaluateSingle(playerHand, dealerValue, dealerBust);
-            if (r == RoundResult.PLAYER_WIN) {
-                anyPlayerWin = true;
-            } else if (r == RoundResult.DEALER_WIN) {
-                anyDealerWin = true;
-            }
-        }
-
-        if (anyPlayerWin && !anyDealerWin) {
-            return RoundResult.PLAYER_WIN;
-        }
-        if (anyDealerWin && !anyPlayerWin) {
-            return RoundResult.DEALER_WIN;
-        }
-        return RoundResult.PUSH;
-    }
-
-    private RoundResult evaluateSingle(Hand playerHand, int dealerValue, boolean dealerBust) {
-        int playerValue = playerHand.getBestValue();
-        boolean playerBust = playerValue > 21;
-
-        if (playerBust && dealerBust) {
-            return RoundResult.PUSH;
-        } else if (playerBust) {
-            return RoundResult.DEALER_WIN;
-        } else if (dealerBust) {
-            return RoundResult.PLAYER_WIN;
-        }
-
-        if (playerValue > dealerValue) {
-            return RoundResult.PLAYER_WIN;
-        } else if (dealerValue > playerValue) {
-            return RoundResult.DEALER_WIN;
-        } else {
-            return RoundResult.PUSH;
-        }
-    }
-
-    private void printRoundSummary(List<Hand> playerHands, RoundResult finalResult, Strategy strategy) {
-        int dealerValue = dealerHand.getBestValue();
-        boolean dealerBust = dealerValue > 21;
-
-        System.out.println("Dealer final hand: " + formatHand(dealerHand) + " (" + dealerValue + ")");
-
-        if (playerHands == null || playerHands.isEmpty()) {
-            System.out.println("Player final hand: <none>");
-            System.out.println("Result: " + finalResult);
-            return;
-        }
-        if (playerHands.size() == 1) {
-            Hand playerHand = playerHands.get(0);
-            RoundResult handResult = evaluateSingle(playerHand, dealerValue, dealerBust);
-            System.out.println("Player final hand: " + formatHand(playerHand) + " (" + playerHand.getBestValue() + ")");
-            System.out.println("Result: " + handResult);
-            return;
-        }
-
-        for (int i = 0; i < playerHands.size(); i++) {
-            try {
-                Hand hand = playerHands.get(i);
-                RoundResult handResult = evaluateSingle(hand, dealerValue, dealerBust);
-                System.out.println(
-                        "Player hand #" + (i + 1) + ": " + formatHand(hand) + " (" + hand.getBestValue() + ") -> " + handResult
-                );
-            } catch (RuntimeException e) {
-                System.out.println("Player hand #" + (i + 1) + ": could not print/evaluate hand (" + e.getMessage() + ")");
-            }
-        }
-
-        System.out.println("Final result: " + finalResult);
-    }
-
-    private String formatHand(Hand hand) {
-        StringBuilder sb = new StringBuilder("[");
-        List<Card> cards = hand.getCards();
-
-        for (int i = 0; i < cards.size(); i++) {
-            Card card = cards.get(i);
-            sb.append(card.getRank()).append(" of ").append(card.getSuit());
-            if (i < cards.size() - 1) {
-                sb.append(", ");
-            }
-        }
-
-        sb.append("]");
-        return sb.toString();
-    }
 }
 
