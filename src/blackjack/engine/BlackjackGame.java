@@ -14,26 +14,13 @@ import java.util.List;
 public class BlackjackGame {
     private final Deck deck;
     private final Hand dealerHand = new Hand();
-
-    private Result lastResult;
+    private Action firstAction = null;
 
     public BlackjackGame(Deck deck) {
         this.deck = deck;
     }
 
-    public Deck getDeck() {
-        return deck;
-    }
-
-    public Hand getDealerHand() {
-        return dealerHand;
-    }
-
-    public Result getLastResult() {
-        return lastResult;
-    }
-
-    public Result playRound(Strategy strategy) {
+    public RoundResult playRound(Strategy strategy) {
         Hand initialPlayerHand = new Hand();
         startRound(initialPlayerHand);
 
@@ -42,11 +29,7 @@ public class BlackjackGame {
         List<Hand> finalPlayerHands = playPlayerHands(initialPlayerHand, dealerUpcard, strategy);
         playDealer();
 
-        RoundResult roundResult = new RoundResult(dealerHand, finalPlayerHands, )
-
-        lastResult = evaluateRound(finalPlayerHands);
-        printRoundSummary(finalPlayerHands, lastResult);
-        return lastResult;
+        return new RoundResult(dealerHand, finalPlayerHands, firstAction);
     }
 
     private void startRound(Hand playerHand) {
@@ -62,8 +45,8 @@ public class BlackjackGame {
     private List<Hand> playPlayerHands(Hand initialHand, Card dealerUpcard, Strategy strategy) {
         List<Hand> result = new ArrayList<>();
 
-        Action first = strategy.decide(initialHand, dealerUpcard);
-        if (first == Action.SPLIT && initialHand.isPair()) {
+        firstAction = strategy.decide(initialHand, dealerUpcard);
+        if (firstAction == Action.SPLIT && initialHand.isPair()) {
             Hand h1 = new Hand();
             Hand h2 = new Hand();
             h1.addCard(initialHand.getCard(0));
@@ -87,9 +70,7 @@ public class BlackjackGame {
                 return hand;
             }
 
-
             Action action = strategy.decide(hand, dealerUpcard);
-            System.out.println("ACTION: " + action.name());
             switch (action) {
                 case STAND -> {
                     return hand;
@@ -114,7 +95,5 @@ public class BlackjackGame {
             dealerHand.addCard(deck.draw());
         }
     }
-
-
 }
 
