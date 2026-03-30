@@ -7,6 +7,13 @@ import java.util.List;
 public class Hand {
     private final List<Card> cards = new ArrayList<>();
 
+    public Hand() {
+    }
+
+    public Hand(Hand other) {
+        cards.addAll(other.getCards());
+    }
+
     public void addCard(Card card) {
         cards.add(card);
     }

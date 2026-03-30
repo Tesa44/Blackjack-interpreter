@@ -13,6 +13,13 @@ LCURLY : '{' ;
 RCURLY : '}' ;
 SIMULATE: 'simulate';
 ROUNDS: 'rounds';
+SHOW: 'show';
+GAMES: 'games';
+WHERE: 'where';
+PLAYER: 'player';
+DEALER: 'dealer';
+TOTAL: 'total';
+DOT: '.';
 
 
 INT : [0-9]+ ;

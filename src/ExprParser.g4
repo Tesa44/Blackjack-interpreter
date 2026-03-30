@@ -23,13 +23,20 @@ options { tokenVocab=ExprLexer; }
 //func : ID '(' expr (',' expr)* ')' ;
 
 program
-    : stat EOF
+    : stat+ EOF
     ;
 
 stat:
     SIMULATE expr ROUNDS SEMI
+    | SHOW GAMES WHERE expr SEMI
     ;
 
 expr:
     INT
+    | property EQ INT
+    ;
+
+property:
+    PLAYER DOT TOTAL
+    | DEALER DOT TOTAL
     ;

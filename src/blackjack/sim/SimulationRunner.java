@@ -20,12 +20,12 @@ public class SimulationRunner {
         SimulationResult result = new SimulationResult();
         for (int i = 0; i < config.getRounds(); i++) {
             RoundResult roundResult = game.playRound(strategy);
+            result.addRoundResult(roundResult);
             switch (roundResult.getResult()) {
                 case PLAYER_WIN -> result.setPlayerWins(result.getPlayerWins() + 1);
                 case DEALER_WIN -> result.setDealerWins(result.getDealerWins() + 1);
                 case PUSH -> result.setPushes(result.getPushes() + 1);
             }
-            roundResult.printRoundSummary();
         }
         return result;
     }

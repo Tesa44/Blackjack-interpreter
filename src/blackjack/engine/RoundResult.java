@@ -2,9 +2,10 @@ package blackjack.engine;
 
 import blackjack.strategy.Action;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 
 public class RoundResult {
         public final Hand dealerHand;
@@ -14,17 +15,18 @@ public class RoundResult {
         public Action action;
 
         public RoundResult(Hand dealerHand, List<Hand> playerHands, Action action) {
-            this.dealerHand = dealerHand;
-            this.dealerValue = dealerHand.getBestValue();
+            this.dealerHand = new Hand(dealerHand);
+            this.dealerValue = this.dealerHand.getBestValue();
             this.playerHandsWithBestValues = calculateBestPlayerValues(playerHands);
             this.action = action;
             this.result = evaluateRound();
         }
 
         private Map<Hand, Integer> calculateBestPlayerValues(List<Hand> playerHands) {
-            Map<Hand, Integer> initPlayerHandsWithBestValues = new HashMap<>();
+            Map<Hand, Integer> initPlayerHandsWithBestValues = new LinkedHashMap<>();
             for (Hand hand : playerHands) {
-                initPlayerHandsWithBestValues.put(hand, hand.getBestValue());
+                Hand handSnapshot = new Hand(hand);
+                initPlayerHandsWithBestValues.put(handSnapshot, handSnapshot.getBestValue());
             }
             return initPlayerHandsWithBestValues;
         }
@@ -74,20 +76,34 @@ public class RoundResult {
     }
 
     public void printRoundSummary() {
-        boolean dealerBust = dealerValue > 21;
+        System.out.println(describeRoundSummary());
+    }
 
-        System.out.println("Dealer final hand: " + formatHand(dealerHand) + " (" + dealerValue + ")");
+    public String describeRoundSummary() {
+        boolean dealerBust = dealerValue > 21;
+        StringBuilder summary = new StringBuilder();
+        summary.append("Dealer final hand: ")
+                .append(formatHand(dealerHand))
+                .append(" (")
+                .append(dealerValue)
+                .append(")")
+                .append(System.lineSeparator());
 
         if (playerHandsWithBestValues == null || playerHandsWithBestValues.isEmpty()) {
-            System.out.println("Player final hand: <none>");
-            System.out.println("Result: " + result);
-            return;
+            summary.append("Player final hand: <none>").append(System.lineSeparator());
+            summary.append("Result: ").append(result);
+            return summary.toString();
         }
         if (playerHandsWithBestValues.size() == 1) {
             Map.Entry<Hand, Integer> entry = playerHandsWithBestValues.entrySet().iterator().next();
-            System.out.println("Player final hand: " + formatHand(entry.getKey()) + " (" + entry.getValue() + ")");
-            System.out.println("Result: " + result);
-            return;
+            summary.append("Player final hand: ")
+                    .append(formatHand(entry.getKey()))
+                    .append(" (")
+                    .append(entry.getValue())
+                    .append(")")
+                    .append(System.lineSeparator());
+            summary.append("Result: ").append(result);
+            return summary.toString();
         }
 
         int i = 1;
@@ -96,15 +112,28 @@ public class RoundResult {
                 Hand hand = entry.getKey();
                 int playerBestValue = entry.getValue();
                 Result handResult = evaluateSingle(playerBestValue, dealerValue, dealerBust);
-                System.out.println(
-                        "Player hand #" + i + ": " + formatHand(hand) + " (" + playerBestValue + ") -> " + handResult
-                );
+                summary.append("Player hand #")
+                        .append(i)
+                        .append(": ")
+                        .append(formatHand(hand))
+                        .append(" (")
+                        .append(playerBestValue)
+                        .append(") -> ")
+                        .append(handResult)
+                        .append(System.lineSeparator());
             } catch (RuntimeException e) {
-                System.out.println("Player hand #" + i + ": could not print/evaluate hand (" + e.getMessage() + ")");
+                summary.append("Player hand #")
+                        .append(i)
+                        .append(": could not print/evaluate hand (")
+                        .append(e.getMessage())
+                        .append(")")
+                        .append(System.lineSeparator());
             }
+            i++;
         }
 
-        System.out.println("Final result: " + result);
+        summary.append("Final result: ").append(result);
+        return summary.toString();
     }
 
     private String formatHand(Hand hand) {
@@ -126,6 +155,30 @@ public class RoundResult {
 
     public Result getResult() {
         return result;
+    }
+
+    public int getDealerValue() {
+        return dealerValue;
+    }
+
+    public Map<Hand, Integer> getPlayerHandsWithBestValues() {
+        return playerHandsWithBestValues;
+    }
+
+    public Action getAction() {
+        return action;
+    }
+
+    public boolean hasPlayerTotal(int total) {
+        return playerHandsWithBestValues.values().stream().anyMatch(value -> value == total);
+    }
+
+    public String getPlayerTotalsSummary() {
+        StringJoiner joiner = new StringJoiner(", ");
+        for (int playerValue : playerHandsWithBestValues.values()) {
+            joiner.add(String.valueOf(playerValue));
+        }
+        return joiner.toString();
     }
 }
 
