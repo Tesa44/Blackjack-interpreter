@@ -1,29 +1,8 @@
 parser grammar ExprParser;
 options { tokenVocab=ExprLexer; }
-//
-//program
-//    : stat EOF
-//    | def EOF
-//    ;
-//
-//stat: ID '=' expr ';'
-//    | expr ';'
-//    ;
-//
-//def : ID '(' ID (',' ID)* ')' '{' stat* '}' ;
-//
-//expr: ID
-//    | INT
-//    | func
-//    | 'not' expr
-//    | expr 'and' expr
-//    | expr 'or' expr
-//    ;
-//
-//func : ID '(' expr (',' expr)* ')' ;
 
 program
-    : stat+ EOF
+     : strategyBlock? stat* EOF
     ;
 
 stat:
@@ -39,4 +18,55 @@ expr:
 property:
     PLAYER DOT TOTAL
     | DEALER DOT TOTAL
+    ;
+
+
+strategyBlock
+    : STRATEGY LCURLY rule* RCURLY
+    ;
+
+
+rule
+    : WHEN playerCondition AGAINST dealerCondition THEN action SEMI
+    ;
+
+playerCondition
+    : PAIR valueRange
+    | TOTAL valueRange
+    | SOFT rankList
+    ;
+
+dealerCondition
+    : valueRange
+    ;
+
+valueRange
+    : INT (MINUS INT)?
+    ;
+
+rankList
+    : rank (COMMA rank)*
+    ;
+
+rank
+    : ACE
+    | KING
+    | QUEEN
+    | JACK
+    | TEN
+    | NINE
+    | EIGHT
+    | SEVEN
+    | SIX
+    | FIVE
+    | FOUR
+    | THREE
+    | TWO
+    ;
+
+action
+    : HIT
+    | STAND
+    | SPLIT
+    | DOUBLE
     ;
