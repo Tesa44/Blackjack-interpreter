@@ -26,36 +26,51 @@ public class BooleanVisitor extends ExprParserBaseVisitor<String> {
     }
 
     @Override
-    public String visitStat(ExprParser.StatContext ctx) {
-        if (ctx.SIMULATE() != null) {
-            int rounds = Integer.parseInt(ctx.expr().INT().getText());
+    public String visitSim_stat(ExprParser.Sim_statContext ctx) {
+        int rounds = Integer.parseInt(visit(ctx.expr()));
 
-            SimulationConfig config = new SimulationConfig();
-            config.setRounds(rounds);
+        SimulationConfig config = new SimulationConfig();
+        config.setRounds(rounds);
 
-            Deck deck = new Deck();
-            BlackjackGame game = new BlackjackGame(deck);
-            Strategy strategy = BasicStrategyConfig.create();
-            SimulationRunner runner = new SimulationRunner(config, game, strategy);
-            lastSimulationResult = runner.run();
+        Deck deck = new Deck();
+        BlackjackGame game = new BlackjackGame(deck);
+        Strategy strategy = BasicStrategyConfig.create();
+        SimulationRunner runner = new SimulationRunner(config, game, strategy);
+        lastSimulationResult = runner.run();
 
-            return "Simulated " + rounds + " rounds -> "
-                    + "playerWins=" + lastSimulationResult.getPlayerWins() + ", "
-                    + "dealerWins=" + lastSimulationResult.getDealerWins() + ", "
-                    + "pushes=" + lastSimulationResult.getPushes();
-        }
+        return "Simulated " + rounds + " rounds -> "
+                + "playerWins=" + lastSimulationResult.getPlayerWins() + ", "
+                + "dealerWins=" + lastSimulationResult.getDealerWins() + ", "
+                + "pushes=" + lastSimulationResult.getPushes();
+    }
 
+    @Override
+    public String visitShow_stat(ExprParser.Show_statContext ctx) {
         if (lastSimulationResult == null) {
             return "No simulation results available. Run 'simulate ... rounds;' first.";
         }
 
-        return filterRounds(ctx.expr());
+        return visit(ctx.expr());
     }
 
-    private String filterRounds(ExprParser.ExprContext exprContext) {
-        int targetTotal = Integer.parseInt(exprContext.INT().getText());
-        String propertyName = exprContext.property().getText();
+    @Override
+    public String visitInt_tok(ExprParser.Int_tokContext ctx) {
+        return ctx.INT().getText();
+    }
 
+    @Override
+    public String visitCon_tok(ExprParser.Con_tokContext ctx) {
+        String propertyName = visit(ctx.property());
+        int targetTotal = Integer.parseInt(ctx.INT().getText());
+        return filterRounds(propertyName, targetTotal);
+    }
+
+    @Override
+    public String visitProperty(ExprParser.PropertyContext ctx) {
+        return ctx.getText();
+    }
+
+    private String filterRounds(String propertyName, int targetTotal) {
         StringBuilder output = new StringBuilder();
         int matches = 0;
 

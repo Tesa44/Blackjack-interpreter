@@ -27,13 +27,13 @@ program
     ;
 
 stat:
-    SIMULATE expr ROUNDS SEMI
-    | SHOW GAMES WHERE expr SEMI
+    SIMULATE expr ROUNDS SEMI #sim_stat
+    | SHOW GAMES WHERE expr SEMI #show_stat
     ;
 
 expr:
-    INT
-    | property EQ INT
+    INT #int_tok
+    | property EQ INT #con_tok
     ;
 
 property:
