@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 
 public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
     private Strategy currentStrategy = BasicStrategyConfig.create();
@@ -51,7 +52,7 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
 
     @Override
     public String visitSim_stat(ExprParser.Sim_statContext ctx) {
-        return runSimulation(asInt(visit(ctx.expr())), currentStrategy);
+        return runSimulation(Integer.parseInt(ctx.INT().getText()), currentStrategy);
     }
 
 
@@ -165,29 +166,56 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
             return "No simulation results available. Run 'simulate ... rounds;' first.";
         }
 
-        if (ctx.expr() == null) {
+        if (ctx.conditionExpr() == null) {
             return renderAllRounds();
         }
 
-        Object showExpressionResult = visit(ctx.expr());
-        if (showExpressionResult instanceof String) {
-            return asString(showExpressionResult);
+        Predicate<RoundResult> condition = asRoundPredicate(visit(ctx.conditionExpr()));
+        return filterRounds(describeCondition(ctx.conditionExpr()), condition);
+    }
+
+    @Override
+    public Predicate<RoundResult> visitOrCondition(ExprParser.OrConditionContext ctx) {
+        List<ExprParser.ConditionTermContext> terms = ctx.conditionTerm();
+        Predicate<RoundResult> predicate = asRoundPredicate(visit(terms.get(0)));
+
+        for (int i = 1; i < terms.size(); i++) {
+            Predicate<RoundResult> nextPredicate = asRoundPredicate(visit(terms.get(i)));
+            predicate = predicate.or(nextPredicate);
         }
 
-        return renderAllRounds();
+        return predicate;
     }
 
     @Override
-    public Integer visitInt_tok(ExprParser.Int_tokContext ctx) {
-        return Integer.parseInt(ctx.INT().getText());
+    public Predicate<RoundResult> visitAndCondition(ExprParser.AndConditionContext ctx) {
+        List<ExprParser.ConditionFactorContext> factors = ctx.conditionFactor();
+        Predicate<RoundResult> predicate = asRoundPredicate(visit(factors.get(0)));
+
+        for (int i = 1; i < factors.size(); i++) {
+            Predicate<RoundResult> nextPredicate = asRoundPredicate(visit(factors.get(i)));
+            predicate = predicate.and(nextPredicate);
+        }
+
+        return predicate;
     }
 
     @Override
-    public String visitCon_tok(ExprParser.Con_tokContext ctx) {
+    public Predicate<RoundResult> visitComparisonFactor(ExprParser.ComparisonFactorContext ctx) {
+        return asRoundPredicate(visit(ctx.comparison()));
+    }
+
+    @Override
+    public Predicate<RoundResult> visitParenCondition(ExprParser.ParenConditionContext ctx) {
+        return asRoundPredicate(visit(ctx.conditionExpr()));
+    }
+
+    @Override
+    public Predicate<RoundResult> visitCon_tok(ExprParser.Con_tokContext ctx) {
         String propertyName = asProperty(visit(ctx.property()));
         String operator = ctx.comparisonOperator().getText();
         int targetTotal = Integer.parseInt(ctx.INT().getText());
-        return filterRounds(propertyName, operator, targetTotal);
+        return roundResult -> matches(roundResult, propertyName, operator, targetTotal);
     }
 
     @Override
@@ -195,24 +223,20 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
         return ctx.getText();
     }
 
-    private String filterRounds(String propertyName, String operator, int targetTotal) {
+    private String filterRounds(String conditionText, Predicate<RoundResult> condition) {
         StringBuilder output = new StringBuilder();
         int matches = 0;
 
         List<RoundResult> roundResults = lastSimulationResult.getRoundResults();
         for (int i = 0; i < roundResults.size(); i++) {
             RoundResult roundResult = roundResults.get(i);
-            if (!matches(roundResult, propertyName, operator, targetTotal)) {
+            if (!condition.test(roundResult)) {
                 continue;
             }
 
             if (matches == 0) {
                 output.append("Filtered results for ")
-                        .append(propertyName)
-                        .append(" ")
-                        .append(operator)
-                        .append(" ")
-                        .append(targetTotal)
+                        .append(conditionText)
                         .append(":")
                         .append(System.lineSeparator());
             } else {
@@ -225,7 +249,7 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
         }
 
         if (matches == 0) {
-            return "No games matched " + propertyName + " " + operator + " " + targetTotal + ".";
+            return "No games matched " + conditionText + ".";
         }
 
         output.append(System.lineSeparator())
@@ -276,6 +300,53 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
         return output.toString();
     }
 
+    private String describeCondition(ExprParser.ConditionExprContext ctx) {
+        ExprParser.OrConditionContext orCondition = (ExprParser.OrConditionContext) ctx;
+        StringBuilder description = new StringBuilder();
+        List<ExprParser.ConditionTermContext> terms = orCondition.conditionTerm();
+
+        for (int i = 0; i < terms.size(); i++) {
+            if (i > 0) {
+                description.append(" or ");
+            }
+            description.append(describeConditionTerm(terms.get(i)));
+        }
+
+        return description.toString();
+    }
+
+    private String describeConditionTerm(ExprParser.ConditionTermContext ctx) {
+        ExprParser.AndConditionContext andCondition = (ExprParser.AndConditionContext) ctx;
+        StringBuilder description = new StringBuilder();
+        List<ExprParser.ConditionFactorContext> factors = andCondition.conditionFactor();
+
+        for (int i = 0; i < factors.size(); i++) {
+            if (i > 0) {
+                description.append(" and ");
+            }
+            description.append(describeConditionFactor(factors.get(i)));
+        }
+
+        return description.toString();
+    }
+
+    private String describeConditionFactor(ExprParser.ConditionFactorContext ctx) {
+        if (ctx instanceof ExprParser.ComparisonFactorContext comparisonFactor) {
+            return describeComparison((ExprParser.Con_tokContext) comparisonFactor.comparison());
+        }
+
+        ExprParser.ParenConditionContext parenCondition = (ExprParser.ParenConditionContext) ctx;
+        return "(" + describeCondition(parenCondition.conditionExpr()) + ")";
+    }
+
+    private String describeComparison(ExprParser.Con_tokContext ctx) {
+        return ctx.property().getText()
+                + " "
+                + ctx.comparisonOperator().getText()
+                + " "
+                + ctx.INT().getText();
+    }
+
     private PlayerCondition buildPairCondition(int[] range) {
         if (range[0] == range[1]) {
             return new PairCondition(range[0]);
@@ -288,9 +359,7 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
         return new CompositeCondition(conditions);
     }
 
-    private int asInt(Object value) {
-        return (Integer) value;
-    }
+
 
     private Strategy asStrategy(Object value) {
         return (Strategy) value;
@@ -330,5 +399,10 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
 
     private String asString(Object value) {
         return (String) value;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Predicate<RoundResult> asRoundPredicate(Object value) {
+        return (Predicate<RoundResult>) value;
     }
 }

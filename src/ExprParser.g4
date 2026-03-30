@@ -6,13 +6,25 @@ program
     ;
 
 stat:
-    SIMULATE expr ROUNDS SEMI #sim_stat
-    | SHOW GAMES (WHERE expr)? SEMI #show_stat
+    SIMULATE INT ROUNDS SEMI #sim_stat
+    | SHOW GAMES (WHERE conditionExpr)? SEMI #show_stat
     ;
 
-expr:
-    INT #int_tok
-    | property comparisonOperator INT #con_tok
+conditionExpr
+    : conditionTerm (OR conditionTerm)* #orCondition
+    ;
+
+conditionTerm
+    : conditionFactor (AND conditionFactor)* #andCondition
+    ;
+
+conditionFactor
+    : comparison #comparisonFactor
+    | LPAREN conditionExpr RPAREN #parenCondition
+    ;
+
+comparison
+    : property comparisonOperator INT #con_tok
     ;
 
 comparisonOperator
