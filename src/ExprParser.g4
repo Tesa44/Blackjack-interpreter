@@ -12,7 +12,15 @@ stat:
 
 expr:
     INT #int_tok
-    | property EQ INT #con_tok
+    | property comparisonOperator INT #con_tok
+    ;
+
+comparisonOperator
+    : EQ
+    | GT
+    | LT
+    | GTE
+    | LTE
     ;
 
 property:

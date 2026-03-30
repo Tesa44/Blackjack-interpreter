@@ -185,8 +185,9 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
     @Override
     public String visitCon_tok(ExprParser.Con_tokContext ctx) {
         String propertyName = asProperty(visit(ctx.property()));
+        String operator = ctx.comparisonOperator().getText();
         int targetTotal = Integer.parseInt(ctx.INT().getText());
-        return filterRounds(propertyName, targetTotal);
+        return filterRounds(propertyName, operator, targetTotal);
     }
 
     @Override
@@ -194,21 +195,23 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
         return ctx.getText();
     }
 
-    private String filterRounds(String propertyName, int targetTotal) {
+    private String filterRounds(String propertyName, String operator, int targetTotal) {
         StringBuilder output = new StringBuilder();
         int matches = 0;
 
         List<RoundResult> roundResults = lastSimulationResult.getRoundResults();
         for (int i = 0; i < roundResults.size(); i++) {
             RoundResult roundResult = roundResults.get(i);
-            if (!matches(roundResult, propertyName, targetTotal)) {
+            if (!matches(roundResult, propertyName, operator, targetTotal)) {
                 continue;
             }
 
             if (matches == 0) {
                 output.append("Filtered results for ")
                         .append(propertyName)
-                        .append(" = ")
+                        .append(" ")
+                        .append(operator)
+                        .append(" ")
                         .append(targetTotal)
                         .append(":")
                         .append(System.lineSeparator());
@@ -222,7 +225,7 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
         }
 
         if (matches == 0) {
-            return "No games matched " + propertyName + " = " + targetTotal + ".";
+            return "No games matched " + propertyName + " " + operator + " " + targetTotal + ".";
         }
 
         output.append(System.lineSeparator())
@@ -231,11 +234,22 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
         return output.toString();
     }
 
-    private boolean matches(RoundResult roundResult, String propertyName, int targetTotal) {
+    private boolean matches(RoundResult roundResult, String propertyName, String operator, int targetTotal) {
         return switch (propertyName) {
-            case "player.total" -> roundResult.hasPlayerTotal(targetTotal);
-            case "dealer.total" -> roundResult.getDealerValue() == targetTotal;
+            case "player.total" -> roundResult.hasPlayerTotal(operator, targetTotal);
+            case "dealer.total" -> compare(roundResult.getDealerValue(), operator, targetTotal);
             default -> false;
+        };
+    }
+
+    private boolean compare(int actualValue, String operator, int targetValue) {
+        return switch (operator) {
+            case "=" -> actualValue == targetValue;
+            case ">" -> actualValue > targetValue;
+            case "<" -> actualValue < targetValue;
+            case ">=" -> actualValue >= targetValue;
+            case "<=" -> actualValue <= targetValue;
+            default -> throw new IllegalArgumentException("Unsupported comparison operator: " + operator);
         };
     }
 

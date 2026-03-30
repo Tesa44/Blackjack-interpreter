@@ -173,6 +173,22 @@ public class RoundResult {
         return playerHandsWithBestValues.values().stream().anyMatch(value -> value == total);
     }
 
+    public boolean hasPlayerTotal(String operator, int total) {
+        return playerHandsWithBestValues.values().stream()
+                .anyMatch(value -> compare(value, operator, total));
+    }
+
+    private boolean compare(int actualValue, String operator, int targetValue) {
+        return switch (operator) {
+            case "=" -> actualValue == targetValue;
+            case ">" -> actualValue > targetValue;
+            case "<" -> actualValue < targetValue;
+            case ">=" -> actualValue >= targetValue;
+            case "<=" -> actualValue <= targetValue;
+            default -> throw new IllegalArgumentException("Unsupported comparison operator: " + operator);
+        };
+    }
+
     public String getPlayerTotalsSummary() {
         StringJoiner joiner = new StringJoiner(", ");
         for (int playerValue : playerHandsWithBestValues.values()) {
