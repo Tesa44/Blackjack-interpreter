@@ -7,7 +7,7 @@ program
 
 stat:
     SIMULATE expr ROUNDS SEMI #sim_stat
-    | SHOW GAMES WHERE expr SEMI #show_stat
+    | SHOW GAMES (WHERE expr)? SEMI #show_stat
     ;
 
 expr:

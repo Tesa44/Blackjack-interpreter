@@ -165,7 +165,16 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
             return "No simulation results available. Run 'simulate ... rounds;' first.";
         }
 
-        return asProperty(visit(ctx.expr()));
+        if (ctx.expr() == null) {
+            return renderAllRounds();
+        }
+
+        Object showExpressionResult = visit(ctx.expr());
+        if (showExpressionResult instanceof String) {
+            return asString(showExpressionResult);
+        }
+
+        return renderAllRounds();
     }
 
     @Override
@@ -228,6 +237,29 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
             case "dealer.total" -> roundResult.getDealerValue() == targetTotal;
             default -> false;
         };
+    }
+
+    private String renderAllRounds() {
+        StringBuilder output = new StringBuilder();
+        List<RoundResult> roundResults = lastSimulationResult.getRoundResults();
+
+        if (roundResults.isEmpty()) {
+            return "No games were recorded in the last simulation.";
+        }
+
+        output.append("All game results:").append(System.lineSeparator());
+        for (int i = 0; i < roundResults.size(); i++) {
+            if (i > 0) {
+                output.append(System.lineSeparator());
+            }
+            output.append("Game #").append(i + 1).append(System.lineSeparator());
+            output.append(roundResults.get(i).describeRoundSummary());
+        }
+
+        output.append(System.lineSeparator())
+                .append("Total games: ")
+                .append(roundResults.size());
+        return output.toString();
     }
 
     private PlayerCondition buildPairCondition(int[] range) {
