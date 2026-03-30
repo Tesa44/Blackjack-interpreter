@@ -9,6 +9,14 @@ strategyBlock
     : STRATEGY LCURLY rule* RCURLY
     ;
 
+stat
+    : SIMULATE expr ROUNDS SEMI
+    ;
+
+expr
+    : INT
+    ;
+
 rule
     : WHEN playerCondition AGAINST dealerCondition THEN action SEMI
     ;
@@ -54,10 +62,3 @@ action
     | DOUBLE
     ;
 
-stat
-    : SIMULATE expr ROUNDS SEMI
-    ;
-
-expr
-    : INT
-    ;
