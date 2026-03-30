@@ -25,6 +25,7 @@ conditionFactor
 
 comparison
     : property comparisonOperator INT #con_tok
+    | property IN INT RANGE INT #in_range_tok
     ;
 
 comparisonOperator

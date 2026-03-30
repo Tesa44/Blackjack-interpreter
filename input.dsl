@@ -24,4 +24,4 @@ strategy {
   when total 12-16 against 7-11 then HIT;
 }
 simulate 50 rounds;
-show games where dealer.total = 21 or player.total = 21;
+show games where player.total in 17..21;

@@ -219,6 +219,19 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
     }
 
     @Override
+    public Predicate<RoundResult> visitIn_range_tok(ExprParser.In_range_tokContext ctx) {
+        String propertyName = asProperty(visit(ctx.property()));
+        int minTotal = Integer.parseInt(ctx.INT(0).getText());
+        int maxTotal = Integer.parseInt(ctx.INT(1).getText());
+
+        if (minTotal > maxTotal) {
+            throw new IllegalArgumentException("Invalid range in query DSL: min is greater than max");
+        }
+
+        return roundResult -> matchesRange(roundResult, propertyName, minTotal, maxTotal);
+    }
+
+    @Override
     public String visitProperty(ExprParser.PropertyContext ctx) {
         return ctx.getText();
     }
@@ -262,6 +275,14 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
         return switch (propertyName) {
             case "player.total" -> roundResult.hasPlayerTotal(operator, targetTotal);
             case "dealer.total" -> compare(roundResult.getDealerValue(), operator, targetTotal);
+            default -> false;
+        };
+    }
+
+    private boolean matchesRange(RoundResult roundResult, String propertyName, int minTotal, int maxTotal) {
+        return switch (propertyName) {
+            case "player.total" -> roundResult.hasPlayerTotalInRange(minTotal, maxTotal);
+            case "dealer.total" -> roundResult.getDealerValue() >= minTotal && roundResult.getDealerValue() <= maxTotal;
             default -> false;
         };
     }
@@ -332,7 +353,11 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
 
     private String describeConditionFactor(ExprParser.ConditionFactorContext ctx) {
         if (ctx instanceof ExprParser.ComparisonFactorContext comparisonFactor) {
-            return describeComparison((ExprParser.Con_tokContext) comparisonFactor.comparison());
+            ExprParser.ComparisonContext comparison = comparisonFactor.comparison();
+            if (comparison instanceof ExprParser.Con_tokContext conTok) {
+                return describeComparison(conTok);
+            }
+            return describeComparison((ExprParser.In_range_tokContext) comparison);
         }
 
         ExprParser.ParenConditionContext parenCondition = (ExprParser.ParenConditionContext) ctx;
@@ -345,6 +370,14 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
                 + ctx.comparisonOperator().getText()
                 + " "
                 + ctx.INT().getText();
+    }
+
+    private String describeComparison(ExprParser.In_range_tokContext ctx) {
+        return ctx.property().getText()
+                + " in "
+                + ctx.INT(0).getText()
+                + ".."
+                + ctx.INT(1).getText();
     }
 
     private PlayerCondition buildPairCondition(int[] range) {

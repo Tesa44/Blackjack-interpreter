@@ -178,6 +178,11 @@ public class RoundResult {
                 .anyMatch(value -> compare(value, operator, total));
     }
 
+    public boolean hasPlayerTotalInRange(int minTotal, int maxTotal) {
+        return playerHandsWithBestValues.values().stream()
+                .anyMatch(value -> value >= minTotal && value <= maxTotal);
+    }
+
     private boolean compare(int actualValue, String operator, int targetValue) {
         return switch (operator) {
             case "=" -> actualValue == targetValue;
