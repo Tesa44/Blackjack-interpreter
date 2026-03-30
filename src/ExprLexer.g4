@@ -10,6 +10,7 @@ THEN: 'then';
 PAIR: 'pair';
 TOTAL: 'total';
 SOFT: 'soft';
+CARDS: 'cards';
 
 HIT: 'HIT';
 STAND: 'STAND';
@@ -34,6 +35,7 @@ AND : 'and' ;
 OR : 'or' ;
 NOT : 'not' ;
 IN : 'in' ;
+CONTAINS : 'contains' ;
 GTE : '>=' ;
 LTE : '<=' ;
 GT : '>' ;

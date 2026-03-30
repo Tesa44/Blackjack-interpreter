@@ -183,6 +183,15 @@ public class RoundResult {
                 .anyMatch(value -> value >= minTotal && value <= maxTotal);
     }
 
+    public boolean hasPlayerCard(Rank rank) {
+        return playerHandsWithBestValues.keySet().stream()
+                .anyMatch(hand -> handContainsRank(hand, rank));
+    }
+
+    public boolean hasDealerCard(Rank rank) {
+        return handContainsRank(dealerHand, rank);
+    }
+
     private boolean compare(int actualValue, String operator, int targetValue) {
         return switch (operator) {
             case "=" -> actualValue == targetValue;
@@ -192,6 +201,10 @@ public class RoundResult {
             case "<=" -> actualValue <= targetValue;
             default -> throw new IllegalArgumentException("Unsupported comparison operator: " + operator);
         };
+    }
+
+    private boolean handContainsRank(Hand hand, Rank rank) {
+        return hand.getCards().stream().anyMatch(card -> card.getRank() == rank);
     }
 
     public String getPlayerTotalsSummary() {

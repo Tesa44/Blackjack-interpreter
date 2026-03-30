@@ -26,6 +26,7 @@ conditionFactor
 comparison
     : property comparisonOperator INT #con_tok
     | property IN INT RANGE INT #in_range_tok
+    | property CONTAINS rank #contains_tok
     ;
 
 comparisonOperator
@@ -39,6 +40,8 @@ comparisonOperator
 property:
     PLAYER DOT TOTAL
     | DEALER DOT TOTAL
+    | PLAYER DOT CARDS
+    | DEALER DOT CARDS
     ;
 
 

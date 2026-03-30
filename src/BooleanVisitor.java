@@ -232,6 +232,13 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
     }
 
     @Override
+    public Predicate<RoundResult> visitContains_tok(ExprParser.Contains_tokContext ctx) {
+        String propertyName = asProperty(visit(ctx.property()));
+        Rank rank = asRank(visit(ctx.rank()));
+        return roundResult -> matchesContains(roundResult, propertyName, rank);
+    }
+
+    @Override
     public String visitProperty(ExprParser.PropertyContext ctx) {
         return ctx.getText();
     }
@@ -283,6 +290,14 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
         return switch (propertyName) {
             case "player.total" -> roundResult.hasPlayerTotalInRange(minTotal, maxTotal);
             case "dealer.total" -> roundResult.getDealerValue() >= minTotal && roundResult.getDealerValue() <= maxTotal;
+            default -> false;
+        };
+    }
+
+    private boolean matchesContains(RoundResult roundResult, String propertyName, Rank rank) {
+        return switch (propertyName) {
+            case "player.cards" -> roundResult.hasPlayerCard(rank);
+            case "dealer.cards" -> roundResult.hasDealerCard(rank);
             default -> false;
         };
     }
@@ -357,7 +372,10 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
             if (comparison instanceof ExprParser.Con_tokContext conTok) {
                 return describeComparison(conTok);
             }
-            return describeComparison((ExprParser.In_range_tokContext) comparison);
+            if (comparison instanceof ExprParser.In_range_tokContext inRangeTok) {
+                return describeComparison(inRangeTok);
+            }
+            return describeComparison((ExprParser.Contains_tokContext) comparison);
         }
 
         ExprParser.ParenConditionContext parenCondition = (ExprParser.ParenConditionContext) ctx;
@@ -378,6 +396,12 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
                 + ctx.INT(0).getText()
                 + ".."
                 + ctx.INT(1).getText();
+    }
+
+    private String describeComparison(ExprParser.Contains_tokContext ctx) {
+        return ctx.property().getText()
+                + " contains "
+                + ctx.rank().getText();
     }
 
     private PlayerCondition buildPairCondition(int[] range) {
