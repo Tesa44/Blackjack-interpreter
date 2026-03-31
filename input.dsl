@@ -24,4 +24,5 @@ strategy {
   when total 12-16 against 7-11 then HIT;
 }
 simulate 50 rounds;
-show games where player.cards contains TEN or player.cards contains ACE;
+show games where action = SPLIT;
+

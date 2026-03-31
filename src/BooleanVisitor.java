@@ -214,7 +214,19 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
     public Predicate<RoundResult> visitCon_tok(ExprParser.Con_tokContext ctx) {
         String propertyName = asProperty(visit(ctx.property()));
         String operator = ctx.comparisonOperator().getText();
-        int targetTotal = Integer.parseInt(ctx.INT().getText());
+        String targetValue = ctx.getChild(2).getText();
+
+        if ("action".equals(propertyName)) {
+            Action expectedAction = Action.valueOf(targetValue);
+            return roundResult -> matchesAction(roundResult, operator, expectedAction);
+        }
+
+        if ("true".equalsIgnoreCase(targetValue) || "false".equalsIgnoreCase(targetValue)) {
+            boolean targetBoolean = Boolean.parseBoolean(targetValue);
+            return roundResult -> matchesBoolean(roundResult, propertyName, operator, targetBoolean);
+        }
+
+        int targetTotal = Integer.parseInt(targetValue);
         return roundResult -> matches(roundResult, propertyName, operator, targetTotal);
     }
 
@@ -284,6 +296,26 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
             case "dealer.total" -> compare(roundResult.getDealerValue(), operator, targetTotal);
             default -> false;
         };
+    }
+
+    private boolean matchesBoolean(RoundResult roundResult, String propertyName, String operator, boolean expectedValue) {
+        if (!"=".equals(operator)) {
+            throw new IllegalArgumentException("Boolean properties only support '=' comparisons: " + propertyName);
+        }
+
+        return switch (propertyName) {
+            case "player.isPair", "player.IsPair" -> roundResult.hasPlayerPair() == expectedValue;
+            case "player.isSoft", "player.IsSoft" -> roundResult.hasPlayerSoftHand() == expectedValue;
+            default -> false;
+        };
+    }
+
+    private boolean matchesAction(RoundResult roundResult, String operator, Action expectedAction) {
+        if (!"=".equals(operator)) {
+            throw new IllegalArgumentException("Action filters only support '=' comparisons.");
+        }
+
+        return roundResult.getAction() == expectedAction;
     }
 
     private boolean matchesRange(RoundResult roundResult, String propertyName, int minTotal, int maxTotal) {
@@ -387,7 +419,7 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
                 + " "
                 + ctx.comparisonOperator().getText()
                 + " "
-                + ctx.INT().getText();
+                + ctx.getChild(2).getText();
     }
 
     private String describeComparison(ExprParser.In_range_tokContext ctx) {

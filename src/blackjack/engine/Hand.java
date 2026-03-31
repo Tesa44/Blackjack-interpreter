@@ -35,7 +35,16 @@ public class Hand {
     }
 
     public boolean isPair() {
-        return cards.size() == 2 && cards.get(0).getRank() == cards.get(1).getRank();
+        return  cards.get(0).getRank() == cards.get(1).getRank();
+    }
+
+    public boolean isSoft() {
+        int aces = 0;
+
+        for (Card card : cards) {
+            if (card.getRank() == Rank.ACE)  aces++;
+        }
+        return aces > 0;
     }
 
     public int getBestValue() {

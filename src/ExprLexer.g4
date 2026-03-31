@@ -54,8 +54,13 @@ ROUNDS: 'rounds';
 SHOW: 'show';
 GAMES: 'games';
 WHERE: 'where';
+ACTION: 'action';
 PLAYER: 'player';
 DEALER: 'dealer';
+ISPAIR: 'isPair' | 'IsPair';
+ISSOFT: 'isSoft' | 'IsSoft';
+TRUE: 'true' | 'TRUE';
+FALSE: 'false' | 'FALSE';
 DOT: '.';
 
 

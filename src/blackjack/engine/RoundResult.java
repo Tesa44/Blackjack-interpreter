@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
+import java.util.function.Predicate;
 
 public class RoundResult {
         public final Hand dealerHand;
@@ -192,6 +193,14 @@ public class RoundResult {
         return handContainsRank(dealerHand, rank);
     }
 
+    public boolean hasPlayerPair() {
+        return anyPlayerHandMatches(Hand::isPair);
+    }
+
+    public boolean hasPlayerSoftHand() {
+        return anyPlayerHandMatches(Hand::isSoft);
+    }
+
     private boolean compare(int actualValue, String operator, int targetValue) {
         return switch (operator) {
             case "=" -> actualValue == targetValue;
@@ -205,6 +214,10 @@ public class RoundResult {
 
     private boolean handContainsRank(Hand hand, Rank rank) {
         return hand.getCards().stream().anyMatch(card -> card.getRank() == rank);
+    }
+
+    private boolean anyPlayerHandMatches(Predicate<Hand> predicate) {
+        return playerHandsWithBestValues.keySet().stream().anyMatch(predicate);
     }
 
     public String getPlayerTotalsSummary() {
