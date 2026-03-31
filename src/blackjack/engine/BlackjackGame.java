@@ -25,11 +25,13 @@ public class BlackjackGame {
         startRound(initialPlayerHand);
 
         Card dealerUpcard = dealerHand.getCard(0);
+        int dealerUpcardValue = dealerUpcard.getValue();
+        int playerInitialTotal = initialPlayerHand.getBestValue();
 
         List<Hand> finalPlayerHands = playPlayerHands(initialPlayerHand, dealerUpcard, strategy);
         playDealer();
 
-        return new RoundResult(dealerHand, finalPlayerHands, firstAction);
+        return new RoundResult(dealerHand, dealerUpcardValue, playerInitialTotal, finalPlayerHands, firstAction);
     }
 
     private void startRound(Hand playerHand) {

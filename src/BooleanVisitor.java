@@ -293,7 +293,11 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
     private boolean matches(RoundResult roundResult, String propertyName, String operator, int targetTotal) {
         return switch (propertyName) {
             case "player.total" -> roundResult.hasPlayerTotal(operator, targetTotal);
+            case "player.initialTotal", "player.InitialTotal", "player.init", "player.Init" ->
+                    compare(roundResult.getPlayerInitialTotal(), operator, targetTotal);
             case "dealer.total" -> compare(roundResult.getDealerValue(), operator, targetTotal);
+            case "dealer.upcard", "dealer.Upcard", "dealer.init", "dealer.Init" ->
+                    compare(roundResult.getDealerUpcardValue(), operator, targetTotal);
             default -> false;
         };
     }
@@ -321,7 +325,11 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
     private boolean matchesRange(RoundResult roundResult, String propertyName, int minTotal, int maxTotal) {
         return switch (propertyName) {
             case "player.total" -> roundResult.hasPlayerTotalInRange(minTotal, maxTotal);
+            case "player.initialTotal", "player.InitialTotal", "player.init", "player.Init" ->
+                    roundResult.getPlayerInitialTotal() >= minTotal && roundResult.getPlayerInitialTotal() <= maxTotal;
             case "dealer.total" -> roundResult.getDealerValue() >= minTotal && roundResult.getDealerValue() <= maxTotal;
+            case "dealer.upcard", "dealer.Upcard", "dealer.init", "dealer.Init" ->
+                    roundResult.getDealerUpcardValue() >= minTotal && roundResult.getDealerUpcardValue() <= maxTotal;
             default -> false;
         };
     }

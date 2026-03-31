@@ -11,13 +11,17 @@ import java.util.function.Predicate;
 public class RoundResult {
         public final Hand dealerHand;
         private final int dealerValue;
+        private final int dealerUpcardValue;
+        private final int playerInitialTotal;
         public final Map<Hand, Integer> playerHandsWithBestValues;
         public final Result result;
         public Action action;
 
-        public RoundResult(Hand dealerHand, List<Hand> playerHands, Action action) {
+        public RoundResult(Hand dealerHand, int dealerUpcardValue, int playerInitialTotal, List<Hand> playerHands, Action action) {
             this.dealerHand = new Hand(dealerHand);
             this.dealerValue = this.dealerHand.getBestValue();
+            this.dealerUpcardValue = dealerUpcardValue;
+            this.playerInitialTotal = playerInitialTotal;
             this.playerHandsWithBestValues = calculateBestPlayerValues(playerHands);
             this.action = action;
             this.result = evaluateRound();
@@ -162,8 +166,16 @@ public class RoundResult {
         return dealerValue;
     }
 
+    public int getDealerUpcardValue() {
+        return dealerUpcardValue;
+    }
+
     public Map<Hand, Integer> getPlayerHandsWithBestValues() {
         return playerHandsWithBestValues;
+    }
+
+    public int getPlayerInitialTotal() {
+        return playerInitialTotal;
     }
 
     public Action getAction() {

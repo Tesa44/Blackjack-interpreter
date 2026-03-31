@@ -473,20 +473,14 @@ action = DOUBLE
 
 ---
 
-## 5.7 Sortowanie
+## 5.7 Filtrowanie po inicjalizujących kartach
 
 ```
-sort by player.total desc
-sort by dealer.total asc
+dealer.upcard = 10
+player.init in 9..11
+player.initialTotal = 20
 ```
 
----
-
-## 5.8 Limit wyników
-
-```
-limit 10
-```
 
 ---
 
