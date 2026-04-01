@@ -8,6 +8,7 @@ program
 stat:
     SIMULATE INT ROUNDS SEMI #sim_stat
     | SHOW GAMES (WHERE conditionExpr)? SEMI #show_stat
+    | STATS GAMES WHERE conditionExpr SEMI #stats_stat
     ;
 
 conditionExpr

@@ -52,6 +52,7 @@ RCURLY : '}' ;
 SIMULATE: 'simulate';
 ROUNDS: 'rounds';
 SHOW: 'show';
+STATS: 'stats';
 GAMES: 'games';
 WHERE: 'where';
 ACTION: 'action';

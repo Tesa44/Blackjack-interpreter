@@ -2,9 +2,13 @@ import blackjack.engine.BlackjackGame;
 import blackjack.engine.Deck;
 import blackjack.engine.RoundResult;
 import blackjack.engine.Rank;
+import blackjack.query.Filter;
+import blackjack.query.StatsCommand;
 import blackjack.sim.SimulationConfig;
 import blackjack.sim.SimulationResult;
 import blackjack.sim.SimulationRunner;
+import blackjack.sim.StatisticsCalculator;
+import blackjack.sim.StatisticsPrinter;
 import blackjack.strategy.Action;
 import blackjack.strategy.BasicStrategyConfig;
 import blackjack.strategy.Rule;
@@ -16,7 +20,10 @@ import blackjack.strategy.condition.PlayerCondition;
 import blackjack.strategy.condition.SoftCondition;
 import blackjack.strategy.condition.TotalCondition;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -170,8 +177,26 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
             return renderAllRounds();
         }
 
-        Predicate<RoundResult> condition = asRoundPredicate(visit(ctx.conditionExpr()));
-        return filterRounds(describeCondition(ctx.conditionExpr()), condition);
+        Filter filter = createFilter(ctx.conditionExpr());
+        List<RoundResult> filteredResults = filter.apply(lastSimulationResult.getRoundResults());
+        return renderFilteredRounds(describeCondition(ctx.conditionExpr()), filteredResults);
+    }
+
+    @Override
+    public String visitStats_stat(ExprParser.Stats_statContext ctx) {
+        if (lastSimulationResult == null) {
+            return "No simulation results available. Run 'simulate ... rounds;' first.";
+        }
+
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        Filter filter = createFilter(ctx.conditionExpr());
+        StatsCommand statsCommand = new StatsCommand(
+                filter,
+                new StatisticsCalculator(),
+                new StatisticsPrinter(new PrintStream(output))
+        );
+        statsCommand.execute(lastSimulationResult.getRoundResults());
+        return output.toString().trim();
     }
 
     @Override
@@ -255,14 +280,15 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
         return ctx.getText();
     }
 
-    private String filterRounds(String conditionText, Predicate<RoundResult> condition) {
+    private String renderFilteredRounds(String conditionText, List<RoundResult> filteredResults) {
         StringBuilder output = new StringBuilder();
         int matches = 0;
+        Set<RoundResult> matchedResults = new HashSet<>(filteredResults);
 
-        List<RoundResult> roundResults = lastSimulationResult.getRoundResults();
-        for (int i = 0; i < roundResults.size(); i++) {
-            RoundResult roundResult = roundResults.get(i);
-            if (!condition.test(roundResult)) {
+        List<RoundResult> allResults = lastSimulationResult.getRoundResults();
+        for (int i = 0; i < allResults.size(); i++) {
+            RoundResult roundResult = allResults.get(i);
+            if (!matchedResults.contains(roundResult)) {
                 continue;
             }
 
@@ -288,6 +314,11 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
                 .append("Matched games: ")
                 .append(matches);
         return output.toString();
+    }
+
+    private Filter createFilter(ExprParser.ConditionExprContext ctx) {
+        Predicate<RoundResult> condition = asRoundPredicate(visit(ctx));
+        return new Filter(condition);
     }
 
     private boolean matches(RoundResult roundResult, String propertyName, String operator, int targetTotal) {
