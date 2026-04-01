@@ -3,7 +3,9 @@ import blackjack.engine.Deck;
 import blackjack.engine.RoundResult;
 import blackjack.engine.Rank;
 import blackjack.query.Filter;
+import blackjack.query.GroupByClassifier;
 import blackjack.query.StatsCommand;
+import blackjack.sim.GroupedStatisticsPrinter;
 import blackjack.sim.SimulationConfig;
 import blackjack.sim.SimulationResult;
 import blackjack.sim.SimulationRunner;
@@ -193,9 +195,17 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
         StatsCommand statsCommand = new StatsCommand(
                 filter,
                 new StatisticsCalculator(),
-                new StatisticsPrinter(new PrintStream(output))
+                new StatisticsPrinter(new PrintStream(output)),
+                new GroupedStatisticsPrinter(new PrintStream(output))
         );
-        statsCommand.execute(lastSimulationResult.getRoundResults());
+        if (ctx.propertyList() == null) {
+            statsCommand.execute(lastSimulationResult.getRoundResults());
+        } else {
+            statsCommand.execute(
+                    lastSimulationResult.getRoundResults(),
+                    new GroupByClassifier(asPropertyList(visit(ctx.propertyList())))
+            );
+        }
         return output.toString().trim();
     }
 
@@ -280,6 +290,15 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
         return ctx.getText();
     }
 
+    @Override
+    public List<String> visitPropertyList(ExprParser.PropertyListContext ctx) {
+        List<String> properties = new ArrayList<>();
+        for (ExprParser.PropertyContext propertyContext : ctx.property()) {
+            properties.add(asProperty(visit(propertyContext)));
+        }
+        return properties;
+    }
+
     private String renderFilteredRounds(String conditionText, List<RoundResult> filteredResults) {
         StringBuilder output = new StringBuilder();
         int matches = 0;
@@ -317,6 +336,9 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
     }
 
     private Filter createFilter(ExprParser.ConditionExprContext ctx) {
+        if (ctx == null) {
+            return new Filter(roundResult -> true);
+        }
         Predicate<RoundResult> condition = asRoundPredicate(visit(ctx));
         return new Filter(condition);
     }
@@ -506,6 +528,11 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
     }
     private String asProperty(Object value) {
         return (String) value;
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<String> asPropertyList(Object value) {
+        return (List<String>) value;
     }
 
     private int[] asRange(Object value) {

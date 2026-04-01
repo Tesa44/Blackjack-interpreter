@@ -8,7 +8,7 @@ program
 stat:
     SIMULATE INT ROUNDS SEMI #sim_stat
     | SHOW GAMES (WHERE conditionExpr)? SEMI #show_stat
-    | STATS GAMES WHERE conditionExpr SEMI #stats_stat
+    | STATS GAMES (WHERE conditionExpr)? (GROUP BY propertyList)? SEMI #stats_stat
     ;
 
 conditionExpr
@@ -50,6 +50,10 @@ property:
     | DEALER DOT CARDS
     | PLAYER DOT ISPAIR
     | PLAYER DOT ISSOFT
+    ;
+
+propertyList
+    : property (COMMA property)*
     ;
 
 
