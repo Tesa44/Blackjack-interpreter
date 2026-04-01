@@ -5,12 +5,16 @@ import blackjack.engine.Rank;
 import blackjack.query.Filter;
 import blackjack.query.GroupByClassifier;
 import blackjack.query.StatsCommand;
+import blackjack.query.TimelineCommand;
 import blackjack.sim.GroupedStatisticsPrinter;
 import blackjack.sim.SimulationConfig;
 import blackjack.sim.SimulationResult;
 import blackjack.sim.SimulationRunner;
+import blackjack.sim.StreakStatisticsCalculator;
+import blackjack.sim.StreakStatisticsPrinter;
 import blackjack.sim.StatisticsCalculator;
 import blackjack.sim.StatisticsPrinter;
+import blackjack.sim.TimelinePrinter;
 import blackjack.strategy.Action;
 import blackjack.strategy.BasicStrategyConfig;
 import blackjack.strategy.Rule;
@@ -196,16 +200,34 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
                 filter,
                 new StatisticsCalculator(),
                 new StatisticsPrinter(new PrintStream(output)),
-                new GroupedStatisticsPrinter(new PrintStream(output))
+                new GroupedStatisticsPrinter(new PrintStream(output)),
+                new StreakStatisticsCalculator(),
+                new StreakStatisticsPrinter(new PrintStream(output))
         );
-        if (ctx.propertyList() == null) {
+        if (ctx.groupPropertyList() == null) {
             statsCommand.execute(lastSimulationResult.getRoundResults());
         } else {
             statsCommand.execute(
                     lastSimulationResult.getRoundResults(),
-                    new GroupByClassifier(asPropertyList(visit(ctx.propertyList())))
+                    new GroupByClassifier(asPropertyList(visit(ctx.groupPropertyList())))
             );
         }
+        return output.toString().trim();
+    }
+
+    @Override
+    public String visitTimeline_stat(ExprParser.Timeline_statContext ctx) {
+        if (lastSimulationResult == null) {
+            return "No simulation results available. Run 'simulate ... rounds;' first.";
+        }
+
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        Filter filter = createFilter(ctx.conditionExpr());
+        TimelineCommand timelineCommand = new TimelineCommand(
+                filter,
+                new TimelinePrinter(new PrintStream(output))
+        );
+        timelineCommand.execute(lastSimulationResult.getRoundResults());
         return output.toString().trim();
     }
 
@@ -291,9 +313,14 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
     }
 
     @Override
-    public List<String> visitPropertyList(ExprParser.PropertyListContext ctx) {
+    public String visitGroupProperty(ExprParser.GroupPropertyContext ctx) {
+        return ctx.getText();
+    }
+
+    @Override
+    public List<String> visitGroupPropertyList(ExprParser.GroupPropertyListContext ctx) {
         List<String> properties = new ArrayList<>();
-        for (ExprParser.PropertyContext propertyContext : ctx.property()) {
+        for (ExprParser.GroupPropertyContext propertyContext : ctx.groupProperty()) {
             properties.add(asProperty(visit(propertyContext)));
         }
         return properties;

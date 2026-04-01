@@ -23,8 +23,9 @@ strategy {
   when total 12-16 against 2-6 then STAND;
   when total 12-16 against 7-11 then HIT;
 }
-simulate 500 rounds;
-stats games group by dealer.upcard;
+simulate 100 rounds;
+stats games group by player.streaks;
+timeline games;
 
 
 

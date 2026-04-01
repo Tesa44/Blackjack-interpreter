@@ -17,6 +17,14 @@ public class GroupByClassifier {
         return properties;
     }
 
+    public boolean isPlayerStreakGrouping() {
+        return properties.size() == 1 && "player.streaks".equals(properties.get(0));
+    }
+
+    public boolean isDealerStreakGrouping() {
+        return properties.size() == 1 && "dealer.streaks".equals(properties.get(0));
+    }
+
     public GroupKey classify(RoundResult result) {
         StringJoiner joiner = new StringJoiner(", ");
         List<Comparable<?>> sortValues = new ArrayList<>();
@@ -38,6 +46,10 @@ public class GroupByClassifier {
             case "action" -> new PropertyValue("Action: " + result.getAction(), result.getAction().ordinal());
             case "player.isPair", "player.IsPair" -> new PropertyValue("Player pair: " + result.hasPlayerPair(), result.hasPlayerPair());
             case "player.isSoft", "player.IsSoft" -> new PropertyValue("Player soft: " + result.hasPlayerSoftHand(), result.hasPlayerSoftHand());
+            case "player.streaks" ->
+                    throw new IllegalArgumentException("player.streaks can only be used as a standalone group by target.");
+            case "dealer.streaks" ->
+                    throw new IllegalArgumentException("dealer.streaks can only be used as a standalone group by target.");
             default -> throw new IllegalArgumentException("Unsupported group by property: " + property);
         };
     }
