@@ -25,8 +25,7 @@ strategy {
 }
 set balance 250;
 set bet 25;
-simulate 100 rounds;
-show games;
+simulate until 1000;
 stats games group by player.streaks;
 timeline games;
 plot balance;

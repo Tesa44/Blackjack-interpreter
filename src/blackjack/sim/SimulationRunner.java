@@ -23,7 +23,39 @@ public class SimulationRunner {
         result.setBetPerGame(config.getBetPerGame());
         result.addBalanceSnapshot(balance);
 
-        for (int i = 0; i < config.getRounds(); i++) {
+        if (shouldUseUntilMode()) {
+            validateUntilMode();
+            while (shouldContinueUntil(balance)) {
+                balance = playRound(result, balance);
+            }
+        } else {
+            for (int i = 0; i < config.getRounds(); i++) {
+                balance = playRound(result, balance);
+            }
+        }
+
+        result.setFinalBalance(balance);
+        return result;
+    }
+
+    private boolean shouldUseUntilMode() {
+        return config.isRunUntilBroke() || config.getTargetBalance() != null;
+    }
+
+    private void validateUntilMode() {
+        if (config.getBetPerGame() <= 0) {
+            throw new IllegalArgumentException("Bet per game must be greater than 0 for bankroll-based simulation.");
+        }
+    }
+
+    private boolean shouldContinueUntil(int balance) {
+        if (config.getTargetBalance() != null) {
+            return balance > 0 && balance < config.getTargetBalance();
+        }
+        return balance > 0;
+    }
+
+    private int playRound(SimulationResult result, int balance) {
             RoundResult roundResult = game.playRound(strategy);
             result.addRoundResult(roundResult);
             balance += roundResult.getNetBetUnits() * config.getBetPerGame();
@@ -33,9 +65,7 @@ public class SimulationRunner {
                 case DEALER_WIN -> result.setDealerWins(result.getDealerWins() + 1);
                 case PUSH -> result.setPushes(result.getPushes() + 1);
             }
-        }
-        result.setFinalBalance(balance);
-        return result;
+            return balance;
     }
 }
 

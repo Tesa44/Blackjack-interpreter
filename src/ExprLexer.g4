@@ -51,6 +51,7 @@ LCURLY : '{' ;
 RCURLY : '}' ;
 SIMULATE: 'simulate';
 SET: 'set';
+UNTIL: 'until';
 ROUNDS: 'rounds';
 SHOW: 'show';
 STATS: 'stats';

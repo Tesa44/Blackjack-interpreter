@@ -7,6 +7,8 @@ program
 
 stat:
     SIMULATE INT ROUNDS SEMI #sim_stat
+    | SIMULATE UNTIL INT SEMI #sim_until_stat
+    | SIMULATE SEMI #sim_broke_stat
     | SET BALANCE INT SEMI #set_balance_stat
     | SET BET INT SEMI #set_bet_stat
     | PLOT BALANCE SEMI #plot_balance_stat

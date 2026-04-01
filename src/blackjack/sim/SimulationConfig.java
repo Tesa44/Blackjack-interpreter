@@ -4,6 +4,8 @@ public class SimulationConfig {
     private int rounds;
     private int initialBalance;
     private int betPerGame = 1;
+    private Integer targetBalance;
+    private boolean runUntilBroke;
 
     public int getRounds() {
         return rounds;
@@ -27,6 +29,22 @@ public class SimulationConfig {
 
     public void setBetPerGame(int betPerGame) {
         this.betPerGame = betPerGame;
+    }
+
+    public Integer getTargetBalance() {
+        return targetBalance;
+    }
+
+    public void setTargetBalance(Integer targetBalance) {
+        this.targetBalance = targetBalance;
+    }
+
+    public boolean isRunUntilBroke() {
+        return runUntilBroke;
+    }
+
+    public void setRunUntilBroke(boolean runUntilBroke) {
+        this.runUntilBroke = runUntilBroke;
     }
 }
 

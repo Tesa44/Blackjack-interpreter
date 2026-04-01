@@ -73,6 +73,16 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
     }
 
     @Override
+    public String visitSim_until_stat(ExprParser.Sim_until_statContext ctx) {
+        return runSimulationUntilTarget(Integer.parseInt(ctx.INT().getText()), currentStrategy);
+    }
+
+    @Override
+    public String visitSim_broke_stat(ExprParser.Sim_broke_statContext ctx) {
+        return runSimulationUntilBroke(currentStrategy);
+    }
+
+    @Override
     public String visitSet_balance_stat(ExprParser.Set_balance_statContext ctx) {
         configuredInitialBalance = Integer.parseInt(ctx.INT().getText());
         return "Initial balance set to " + configuredInitialBalance;
@@ -201,6 +211,44 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
                 + "dealerWins=" + lastSimulationResult.getDealerWins() + ", "
                 + "pushes=" + lastSimulationResult.getPushes() + ", "
                 + "balance=" + lastSimulationResult.getFinalBalance();
+    }
+
+    private String runSimulationUntilTarget(int targetBalance, Strategy strategy) {
+        SimulationConfig config = new SimulationConfig();
+        config.setInitialBalance(configuredInitialBalance);
+        config.setBetPerGame(configuredBetPerGame);
+        config.setTargetBalance(targetBalance);
+
+        Deck deck = new Deck();
+        BlackjackGame game = new BlackjackGame(deck);
+        SimulationRunner runner = new SimulationRunner(config, game, strategy);
+        lastSimulationResult = runner.run();
+
+        return "Simulated until balance reached "
+                + targetBalance
+                + " or bankroll was exhausted -> rounds=" + lastSimulationResult.getRoundResults().size()
+                + ", playerWins=" + lastSimulationResult.getPlayerWins()
+                + ", dealerWins=" + lastSimulationResult.getDealerWins()
+                + ", pushes=" + lastSimulationResult.getPushes()
+                + ", balance=" + lastSimulationResult.getFinalBalance();
+    }
+
+    private String runSimulationUntilBroke(Strategy strategy) {
+        SimulationConfig config = new SimulationConfig();
+        config.setInitialBalance(configuredInitialBalance);
+        config.setBetPerGame(configuredBetPerGame);
+        config.setRunUntilBroke(true);
+
+        Deck deck = new Deck();
+        BlackjackGame game = new BlackjackGame(deck);
+        SimulationRunner runner = new SimulationRunner(config, game, strategy);
+        lastSimulationResult = runner.run();
+
+        return "Simulated until bankroll was exhausted -> rounds=" + lastSimulationResult.getRoundResults().size()
+                + ", playerWins=" + lastSimulationResult.getPlayerWins()
+                + ", dealerWins=" + lastSimulationResult.getDealerWins()
+                + ", pushes=" + lastSimulationResult.getPushes()
+                + ", balance=" + lastSimulationResult.getFinalBalance();
     }
 
     @Override
