@@ -4,8 +4,10 @@ import blackjack.engine.RoundResult;
 import blackjack.engine.Rank;
 import blackjack.query.Filter;
 import blackjack.query.GroupByClassifier;
+import blackjack.query.PlotBalanceCommand;
 import blackjack.query.StatsCommand;
 import blackjack.query.TimelineCommand;
+import blackjack.sim.BalancePlotter;
 import blackjack.sim.GroupedStatisticsPrinter;
 import blackjack.sim.SimulationConfig;
 import blackjack.sim.SimulationResult;
@@ -38,6 +40,8 @@ import java.util.function.Predicate;
 public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
     private Strategy currentStrategy = BasicStrategyConfig.create();
     private SimulationResult lastSimulationResult;
+    private int configuredInitialBalance = 0;
+    private int configuredBetPerGame = 1;
 
 
     @Override
@@ -66,6 +70,29 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
     @Override
     public String visitSim_stat(ExprParser.Sim_statContext ctx) {
         return runSimulation(Integer.parseInt(ctx.INT().getText()), currentStrategy);
+    }
+
+    @Override
+    public String visitSet_balance_stat(ExprParser.Set_balance_statContext ctx) {
+        configuredInitialBalance = Integer.parseInt(ctx.INT().getText());
+        return "Initial balance set to " + configuredInitialBalance;
+    }
+
+    @Override
+    public String visitSet_bet_stat(ExprParser.Set_bet_statContext ctx) {
+        configuredBetPerGame = Integer.parseInt(ctx.INT().getText());
+        return "Bet per game set to " + configuredBetPerGame;
+    }
+
+    @Override
+    public String visitPlot_balance_stat(ExprParser.Plot_balance_statContext ctx) {
+        if (lastSimulationResult == null) {
+            return "No simulation results available. Run 'simulate ... rounds;' first.";
+        }
+
+        PlotBalanceCommand plotBalanceCommand = new PlotBalanceCommand(new BalancePlotter());
+        String outputPath = plotBalanceCommand.execute(lastSimulationResult);
+        return "Balance plot saved to " + outputPath;
     }
 
 
@@ -161,6 +188,8 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
     private String runSimulation(int rounds, Strategy strategy) {
         SimulationConfig config = new SimulationConfig();
         config.setRounds(rounds);
+        config.setInitialBalance(configuredInitialBalance);
+        config.setBetPerGame(configuredBetPerGame);
 
         Deck deck = new Deck();
         BlackjackGame game = new BlackjackGame(deck);
@@ -170,7 +199,8 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
         return "Simulated " + rounds + " rounds -> "
                 + "playerWins=" + lastSimulationResult.getPlayerWins() + ", "
                 + "dealerWins=" + lastSimulationResult.getDealerWins() + ", "
-                + "pushes=" + lastSimulationResult.getPushes();
+                + "pushes=" + lastSimulationResult.getPushes() + ", "
+                + "balance=" + lastSimulationResult.getFinalBalance();
     }
 
     @Override

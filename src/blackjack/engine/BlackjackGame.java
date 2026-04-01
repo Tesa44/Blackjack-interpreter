@@ -28,7 +28,7 @@ public class BlackjackGame {
         int dealerUpcardValue = dealerUpcard.getValue();
         int playerInitialTotal = initialPlayerHand.getBestValue();
 
-        List<Hand> finalPlayerHands = playPlayerHands(initialPlayerHand, dealerUpcard, strategy);
+        List<PlayerHandSnapshot> finalPlayerHands = playPlayerHands(initialPlayerHand, dealerUpcard, strategy);
         playDealer();
 
         return new RoundResult(dealerHand, dealerUpcardValue, playerInitialTotal, finalPlayerHands, firstAction);
@@ -44,58 +44,69 @@ public class BlackjackGame {
         dealerHand.addCard(deck.draw());
     }
 
-    private List<Hand> playPlayerHands(Hand initialHand, Card dealerUpcard, Strategy strategy) {
-        List<Hand> result = new ArrayList<>();
+    private List<PlayerHandSnapshot> playPlayerHands(Hand initialHand, Card dealerUpcard, Strategy strategy) {
+        List<PlayerHandSnapshot> result = new ArrayList<>();
 
         firstAction = strategy.decide(initialHand, dealerUpcard);
         if (firstAction == Action.SPLIT && initialHand.isPair()) {
-            Hand h1 = new Hand();
-            Hand h2 = new Hand();
-            h1.addCard(initialHand.getCard(0));
-            h2.addCard(initialHand.getCard(1));
+            HandState h1 = new HandState();
+            HandState h2 = new HandState();
+            h1.hand.addCard(initialHand.getCard(0));
+            h2.hand.addCard(initialHand.getCard(1));
 
-            h1.addCard(deck.draw());
-            h2.addCard(deck.draw());
+            h1.hand.addCard(deck.draw());
+            h2.hand.addCard(deck.draw());
 
-            result.add(playSingleHand(h1, dealerUpcard, strategy));
-            result.add(playSingleHand(h2, dealerUpcard, strategy));
+            result.add(toSnapshot(playSingleHand(h1, dealerUpcard, strategy)));
+            result.add(toSnapshot(playSingleHand(h2, dealerUpcard, strategy)));
             return result;
         }
 
-        result.add(playSingleHand(initialHand, dealerUpcard, strategy));
+        HandState singleHand = new HandState();
+        singleHand.hand = initialHand;
+        result.add(toSnapshot(playSingleHand(singleHand, dealerUpcard, strategy)));
         return result;
     }
 
-    private Hand playSingleHand(Hand hand, Card dealerUpcard, Strategy strategy) {
+    private HandState playSingleHand(HandState handState, Card dealerUpcard, Strategy strategy) {
         while (true) {
-            if (hand.getBestValue() > 21) {
-                return hand;
+            if (handState.hand.getBestValue() > 21) {
+                return handState;
             }
 
-            Action action = strategy.decide(hand, dealerUpcard);
+            Action action = strategy.decide(handState.hand, dealerUpcard);
             switch (action) {
                 case STAND -> {
-                    return hand;
+                    return handState;
                 }
-                case HIT -> hand.addCard(deck.draw());
+                case HIT -> handState.hand.addCard(deck.draw());
                 case DOUBLE -> {
-                    // TODO: add betting/money impact for DOUBLE once bankroll logic exists
-                    hand.addCard(deck.draw());
-                    return hand;
+                    handState.betMultiplier *= 2;
+                    handState.hand.addCard(deck.draw());
+                    return handState;
                 }
                 case SPLIT -> {
                     //TODO: consider recursive splitting
                     //No recursive splitting. If a split is requested here, treat as HIT.
-                    hand.addCard(deck.draw());
+                    handState.hand.addCard(deck.draw());
                 }
             }
         }
+    }
+
+    private PlayerHandSnapshot toSnapshot(HandState handState) {
+        return new PlayerHandSnapshot(handState.hand, handState.betMultiplier);
     }
 
     private void playDealer() {
         while (dealerHand.getBestValue() < 17) {
             dealerHand.addCard(deck.draw());
         }
+    }
+
+    private static class HandState {
+        private Hand hand = new Hand();
+        private int betMultiplier = 1;
     }
 }
 

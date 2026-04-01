@@ -7,6 +7,9 @@ program
 
 stat:
     SIMULATE INT ROUNDS SEMI #sim_stat
+    | SET BALANCE INT SEMI #set_balance_stat
+    | SET BET INT SEMI #set_bet_stat
+    | PLOT BALANCE SEMI #plot_balance_stat
     | SHOW GAMES (WHERE conditionExpr)? SEMI #show_stat
     | STATS GAMES (WHERE conditionExpr)? (GROUP BY groupPropertyList)? SEMI #stats_stat
     | TIMELINE GAMES (WHERE conditionExpr)? SEMI #timeline_stat

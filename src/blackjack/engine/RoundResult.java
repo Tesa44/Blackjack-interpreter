@@ -3,6 +3,7 @@ package blackjack.engine;
 import blackjack.strategy.Action;
 
 import java.util.LinkedHashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
@@ -14,26 +15,28 @@ public class RoundResult {
         private final int dealerUpcardValue;
         private final int playerInitialTotal;
         public final Map<Hand, Integer> playerHandsWithBestValues;
+        private final List<Integer> playerHandBetMultipliers;
         public final Result result;
         public Action action;
 
-        public RoundResult(Hand dealerHand, int dealerUpcardValue, int playerInitialTotal, List<Hand> playerHands, Action action) {
+        public RoundResult(Hand dealerHand, int dealerUpcardValue, int playerInitialTotal, List<PlayerHandSnapshot> playerHands, Action action) {
             this.dealerHand = new Hand(dealerHand);
             this.dealerValue = this.dealerHand.getBestValue();
             this.dealerUpcardValue = dealerUpcardValue;
             this.playerInitialTotal = playerInitialTotal;
-            this.playerHandsWithBestValues = calculateBestPlayerValues(playerHands);
+            this.playerHandsWithBestValues = new LinkedHashMap<>();
+            this.playerHandBetMultipliers = new ArrayList<>();
+            capturePlayerHands(playerHands);
             this.action = action;
             this.result = evaluateRound();
         }
 
-        private Map<Hand, Integer> calculateBestPlayerValues(List<Hand> playerHands) {
-            Map<Hand, Integer> initPlayerHandsWithBestValues = new LinkedHashMap<>();
-            for (Hand hand : playerHands) {
-                Hand handSnapshot = new Hand(hand);
-                initPlayerHandsWithBestValues.put(handSnapshot, handSnapshot.getBestValue());
+        private void capturePlayerHands(List<PlayerHandSnapshot> playerHands) {
+            for (PlayerHandSnapshot handSnapshotSource : playerHands) {
+                Hand handSnapshot = handSnapshotSource.getHand();
+                playerHandsWithBestValues.put(handSnapshot, handSnapshot.getBestValue());
+                playerHandBetMultipliers.add(handSnapshotSource.getBetMultiplier());
             }
-            return initPlayerHandsWithBestValues;
         }
 
     private Result evaluateRound() {
@@ -211,6 +214,27 @@ public class RoundResult {
 
     public boolean hasPlayerSoftHand() {
         return anyPlayerHandMatches(Hand::isSoft);
+    }
+
+    public int getNetBetUnits() {
+        int netUnits = 0;
+        boolean dealerBust = dealerValue > 21;
+
+        int handIndex = 0;
+        for (Map.Entry<Hand, Integer> entry : playerHandsWithBestValues.entrySet()) {
+            int playerValue = entry.getValue();
+            int betMultiplier = playerHandBetMultipliers.get(handIndex);
+            Result handResult = evaluateSingle(playerValue, dealerValue, dealerBust);
+
+            if (handResult == Result.PLAYER_WIN) {
+                netUnits += betMultiplier;
+            } else if (handResult == Result.DEALER_WIN) {
+                netUnits -= betMultiplier;
+            }
+            handIndex++;
+        }
+
+        return netUnits;
     }
 
     private boolean compare(int actualValue, String operator, int targetValue) {

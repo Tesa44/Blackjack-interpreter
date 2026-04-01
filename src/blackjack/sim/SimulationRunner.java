@@ -18,15 +18,23 @@ public class SimulationRunner {
 
     public SimulationResult run() {
         SimulationResult result = new SimulationResult();
+        int balance = config.getInitialBalance();
+        result.setInitialBalance(config.getInitialBalance());
+        result.setBetPerGame(config.getBetPerGame());
+        result.addBalanceSnapshot(balance);
+
         for (int i = 0; i < config.getRounds(); i++) {
             RoundResult roundResult = game.playRound(strategy);
             result.addRoundResult(roundResult);
+            balance += roundResult.getNetBetUnits() * config.getBetPerGame();
+            result.addBalanceSnapshot(balance);
             switch (roundResult.getResult()) {
                 case PLAYER_WIN -> result.setPlayerWins(result.getPlayerWins() + 1);
                 case DEALER_WIN -> result.setDealerWins(result.getDealerWins() + 1);
                 case PUSH -> result.setPushes(result.getPushes() + 1);
             }
         }
+        result.setFinalBalance(balance);
         return result;
     }
 }

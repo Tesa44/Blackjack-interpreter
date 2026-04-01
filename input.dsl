@@ -23,9 +23,13 @@ strategy {
   when total 12-16 against 2-6 then STAND;
   when total 12-16 against 7-11 then HIT;
 }
+set balance 250;
+set bet 25;
 simulate 100 rounds;
+show games;
 stats games group by player.streaks;
 timeline games;
+plot balance;
 
 
 
