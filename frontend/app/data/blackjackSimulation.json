@@ -1,0 +1,24 @@
+{
+  "simulationData": [
+    { "round": 1, "balance": 1000 },
+    { "round": 2, "balance": 1050 },
+    { "round": 3, "balance": 1100 },
+    { "round": 4, "balance": 1075 },
+    { "round": 5, "balance": 1150 },
+    { "round": 6, "balance": 1180 },
+    { "round": 7, "balance": 1120 },
+    { "round": 8, "balance": 1200 },
+    { "round": 9, "balance": 1250 },
+    { "round": 10, "balance": 1300 },
+    { "round": 11, "balance": 1280 },
+    { "round": 12, "balance": 1350 },
+    { "round": 13, "balance": 1400 },
+    { "round": 14, "balance": 1375 },
+    { "round": 15, "balance": 1450 },
+    { "round": 16, "balance": 1500 },
+    { "round": 17, "balance": 1480 },
+    { "round": 18, "balance": 1550 },
+    { "round": 19, "balance": 1600 },
+    { "round": 20, "balance": 1650 }
+  ]
+}
