@@ -4,6 +4,7 @@ import blackjack.strategy.Action;
 
 import java.util.LinkedHashMap;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
@@ -175,6 +176,10 @@ public class RoundResult {
 
     public Map<Hand, Integer> getPlayerHandsWithBestValues() {
         return playerHandsWithBestValues;
+    }
+
+    public List<Integer> getPlayerHandBetMultipliers() {
+        return Collections.unmodifiableList(playerHandBetMultipliers);
     }
 
     public int getPlayerInitialTotal() {

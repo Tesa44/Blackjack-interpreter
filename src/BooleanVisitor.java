@@ -8,9 +8,11 @@ import blackjack.query.PlotBalanceCommand;
 import blackjack.query.StatsCommand;
 import blackjack.query.TimelineCommand;
 import blackjack.sim.BalancePlotter;
+import blackjack.sim.FrontendExportData;
 import blackjack.sim.GroupedStatisticsPrinter;
 import blackjack.sim.SimulationConfig;
 import blackjack.sim.SimulationResult;
+import blackjack.sim.SimulationResultJsonExporter;
 import blackjack.sim.SimulationRunner;
 import blackjack.sim.StreakStatisticsCalculator;
 import blackjack.sim.StreakStatisticsPrinter;
@@ -31,6 +33,7 @@ import blackjack.strategy.condition.TotalCondition;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -42,6 +45,8 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
     private SimulationResult lastSimulationResult;
     private int configuredInitialBalance = 0;
     private int configuredBetPerGame = 1;
+    private final SimulationResultJsonExporter simulationResultJsonExporter = new SimulationResultJsonExporter();
+    private FrontendExportData frontendExportData = new FrontendExportData();
 
 
     @Override
@@ -49,6 +54,7 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
         currentStrategy = ctx.strategyBlock() == null
                 ? BasicStrategyConfig.create()
                 : asStrategy(visit(ctx.strategyBlock()));
+        frontendExportData = new FrontendExportData();
 
         StringBuilder output = new StringBuilder();
         for (ExprParser.StatContext statContext : ctx.stat()) {
@@ -61,6 +67,14 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
                 output.append(System.lineSeparator()).append(System.lineSeparator());
             }
             output.append(statementResult);
+        }
+
+        if (lastSimulationResult != null && frontendExportData.getSummary() != null) {
+            String exportPath = simulationResultJsonExporter.export(frontendExportData);
+            if (!output.isEmpty()) {
+                output.append(System.lineSeparator()).append(System.lineSeparator());
+            }
+            output.append("Frontend JSON saved to ").append(exportPath);
         }
 
         return output.toString();
@@ -102,6 +116,9 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
 
         PlotBalanceCommand plotBalanceCommand = new PlotBalanceCommand(new BalancePlotter());
         String outputPath = plotBalanceCommand.execute(lastSimulationResult);
+        frontendExportData.setPlotResult(
+                new FrontendExportData.PlotResult(new ArrayList<>(lastSimulationResult.getBalanceHistory()))
+        );
         return "Balance plot saved to " + outputPath;
     }
 
@@ -204,7 +221,8 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
         Deck deck = new Deck();
         BlackjackGame game = new BlackjackGame(deck);
         SimulationRunner runner = new SimulationRunner(config, game, strategy);
-         lastSimulationResult = runner.run();
+        lastSimulationResult = runner.run();
+        resetFrontendExport("SIMULATE_ROUNDS");
 
         return "Simulated " + rounds + " rounds -> "
                 + "playerWins=" + lastSimulationResult.getPlayerWins() + ", "
@@ -223,6 +241,7 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
         BlackjackGame game = new BlackjackGame(deck);
         SimulationRunner runner = new SimulationRunner(config, game, strategy);
         lastSimulationResult = runner.run();
+        resetFrontendExport("SIMULATE_UNTIL_TARGET");
 
         return "Simulated until balance reached "
                 + targetBalance
@@ -243,6 +262,7 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
         BlackjackGame game = new BlackjackGame(deck);
         SimulationRunner runner = new SimulationRunner(config, game, strategy);
         lastSimulationResult = runner.run();
+        resetFrontendExport("SIMULATE_UNTIL_BROKE");
 
         return "Simulated until bankroll was exhausted -> rounds=" + lastSimulationResult.getRoundResults().size()
                 + ", playerWins=" + lastSimulationResult.getPlayerWins()
@@ -258,11 +278,17 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
         }
 
         if (ctx.conditionExpr() == null) {
+            frontendExportData.getShowResults().add(
+                    new FrontendExportData.ShowResult("all games", buildRoundViews(lastSimulationResult.getRoundResults()))
+            );
             return renderAllRounds();
         }
 
         Filter filter = createFilter(ctx.conditionExpr());
         List<RoundResult> filteredResults = filter.apply(lastSimulationResult.getRoundResults());
+        frontendExportData.getShowResults().add(
+                new FrontendExportData.ShowResult(describeCondition(ctx.conditionExpr()), buildRoundViews(filteredResults))
+        );
         return renderFilteredRounds(describeCondition(ctx.conditionExpr()), filteredResults);
     }
 
@@ -290,7 +316,17 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
                     new GroupByClassifier(asPropertyList(visit(ctx.groupPropertyList())))
             );
         }
-        return output.toString().trim();
+        String statsText = output.toString().trim();
+        frontendExportData.getStatsResults().add(
+                new FrontendExportData.StatsResult(
+                        ctx.conditionExpr() == null ? "all games" : describeCondition(ctx.conditionExpr()),
+                        ctx.groupPropertyList() == null
+                                ? Collections.emptyList()
+                                : new ArrayList<>(asPropertyList(visit(ctx.groupPropertyList()))),
+                        statsText
+                )
+        );
+        return statsText;
     }
 
     @Override
@@ -301,11 +337,18 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
 
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         Filter filter = createFilter(ctx.conditionExpr());
+        List<RoundResult> filteredResults = filter.apply(lastSimulationResult.getRoundResults());
         TimelineCommand timelineCommand = new TimelineCommand(
                 filter,
                 new TimelinePrinter(new PrintStream(output))
         );
         timelineCommand.execute(lastSimulationResult.getRoundResults());
+        frontendExportData.getTimelineResults().add(
+                new FrontendExportData.TimelineResult(
+                        ctx.conditionExpr() == null ? "all games" : describeCondition(ctx.conditionExpr()),
+                        buildRoundViews(filteredResults)
+                )
+        );
         return output.toString().trim();
     }
 
@@ -600,6 +643,37 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
         return ctx.property().getText()
                 + " contains "
                 + ctx.rank().getText();
+    }
+
+    private void resetFrontendExport(String simulationMode) {
+        frontendExportData = new FrontendExportData();
+        frontendExportData.setSummary(
+                new FrontendExportData.Summary(
+                        simulationMode,
+                        lastSimulationResult.getRoundResults().size(),
+                        lastSimulationResult.getPlayerWins(),
+                        lastSimulationResult.getDealerWins(),
+                        lastSimulationResult.getPushes(),
+                        lastSimulationResult.getInitialBalance(),
+                        lastSimulationResult.getBetPerGame(),
+                        lastSimulationResult.getFinalBalance()
+                )
+        );
+    }
+
+    private List<FrontendExportData.RoundView> buildRoundViews(List<RoundResult> results) {
+        List<FrontendExportData.RoundView> roundViews = new ArrayList<>();
+        List<RoundResult> allResults = lastSimulationResult.getRoundResults();
+        Set<RoundResult> selectedResults = new HashSet<>(results);
+
+        for (int i = 0; i < allResults.size(); i++) {
+            RoundResult roundResult = allResults.get(i);
+            if (selectedResults.contains(roundResult)) {
+                roundViews.add(new FrontendExportData.RoundView(i + 1, roundResult));
+            }
+        }
+
+        return roundViews;
     }
 
     private PlayerCondition buildPairCondition(int[] range) {
