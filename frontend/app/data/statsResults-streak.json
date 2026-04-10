@@ -1,0 +1,9 @@
+{
+  "statsResults": [
+    {
+      "filter": "all games",
+      "groupBy": ["player.streaks"],
+      "text": "Player streaks:\r\nStreak 1: 12 times (48.0%)\r\nStreak 2: 7 times (28.0%)\r\nStreak 3: 2 times (8.0%)\r\nStreak 4: 1 times (4.0%)\r\nStreak 5: 1 times (4.0%)\r\nStreak 6: 2 times (8.0%)"
+    }
+  ]
+}

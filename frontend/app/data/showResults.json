@@ -1,0 +1,248 @@
+{
+  "showResults": [
+    {
+      "filter": "player.total in 19..21",
+      "rounds": [
+        {
+          "roundNumber": 3,
+          "result": "PLAYER_WIN",
+          "action": "STAND",
+          "dealerTotal": 25,
+          "dealerUpcard": 10,
+          "playerInitialTotal": 20,
+          "netBetUnits": 1,
+          "dealerCards": [
+            { "rank": "TEN", "suit": "HEARTS", "value": 10 },
+            { "rank": "FOUR", "suit": "HEARTS", "value": 4 },
+            { "rank": "TWO", "suit": "HEARTS", "value": 2 },
+            { "rank": "NINE", "suit": "HEARTS", "value": 9 }
+          ],
+          "playerHands": [
+            {
+              "bestValue": 20,
+              "betMultiplier": 1,
+              "isPair": false,
+              "isSoft": false,
+              "cards": [
+                { "rank": "JACK", "suit": "CLUBS", "value": 10 },
+                { "rank": "QUEEN", "suit": "DIAMONDS", "value": 10 }
+              ]
+            }
+          ]
+        },
+        {
+          "roundNumber": 6,
+          "result": "PLAYER_WIN",
+          "action": "STAND",
+          "dealerTotal": 18,
+          "dealerUpcard": 2,
+          "playerInitialTotal": 21,
+          "netBetUnits": 1,
+          "dealerCards": [
+            { "rank": "TWO", "suit": "SPADES", "value": 2 },
+            { "rank": "SIX", "suit": "SPADES", "value": 6 },
+            { "rank": "KING", "suit": "SPADES", "value": 10 }
+          ],
+          "playerHands": [
+            {
+              "bestValue": 21,
+              "betMultiplier": 1,
+              "isPair": false,
+              "isSoft": true,
+              "cards": [
+                { "rank": "KING", "suit": "DIAMONDS", "value": 10 },
+                { "rank": "ACE", "suit": "SPADES", "value": 11 }
+              ]
+            }
+          ]
+        },
+        {
+          "roundNumber": 8,
+          "result": "PLAYER_WIN",
+          "action": "HIT",
+          "dealerTotal": 22,
+          "dealerUpcard": 9,
+          "playerInitialTotal": 14,
+          "netBetUnits": 1,
+          "dealerCards": [
+            { "rank": "NINE", "suit": "DIAMONDS", "value": 9 },
+            { "rank": "FIVE", "suit": "DIAMONDS", "value": 5 },
+            { "rank": "EIGHT", "suit": "DIAMONDS", "value": 8 }
+          ],
+          "playerHands": [
+            {
+              "bestValue": 20,
+              "betMultiplier": 1,
+              "isPair": false,
+              "isSoft": false,
+              "cards": [
+                { "rank": "EIGHT", "suit": "HEARTS", "value": 8 },
+                { "rank": "SIX", "suit": "HEARTS", "value": 6 },
+                { "rank": "SIX", "suit": "DIAMONDS", "value": 6 }
+              ]
+            }
+          ]
+        },
+        {
+          "roundNumber": 11,
+          "result": "PLAYER_WIN",
+          "action": "HIT",
+          "dealerTotal": 18,
+          "dealerUpcard": 8,
+          "playerInitialTotal": 12,
+          "netBetUnits": 1,
+          "dealerCards": [
+            { "rank": "EIGHT", "suit": "DIAMONDS", "value": 8 },
+            { "rank": "TEN", "suit": "CLUBS", "value": 10 }
+          ],
+          "playerHands": [
+            {
+              "bestValue": 19,
+              "betMultiplier": 1,
+              "isPair": false,
+              "isSoft": false,
+              "cards": [
+                { "rank": "TEN", "suit": "DIAMONDS", "value": 10 },
+                { "rank": "TWO", "suit": "DIAMONDS", "value": 2 },
+                { "rank": "SEVEN", "suit": "DIAMONDS", "value": 7 }
+              ]
+            }
+          ]
+        },
+        {
+          "roundNumber": 14,
+          "result": "PLAYER_WIN",
+          "action": "HIT",
+          "dealerTotal": 17,
+          "dealerUpcard": 11,
+          "playerInitialTotal": 12,
+          "netBetUnits": 1,
+          "dealerCards": [
+            { "rank": "ACE", "suit": "CLUBS", "value": 11 },
+            { "rank": "FIVE", "suit": "HEARTS", "value": 5 },
+            { "rank": "ACE", "suit": "SPADES", "value": 11 }
+          ],
+          "playerHands": [
+            {
+              "bestValue": 20,
+              "betMultiplier": 1,
+              "isPair": false,
+              "isSoft": false,
+              "cards": [
+                { "rank": "TWO", "suit": "HEARTS", "value": 2 },
+                { "rank": "JACK", "suit": "CLUBS", "value": 10 },
+                { "rank": "EIGHT", "suit": "CLUBS", "value": 8 }
+              ]
+            }
+          ]
+        },
+        {
+          "roundNumber": 15,
+          "result": "PUSH",
+          "action": "HIT",
+          "dealerTotal": 19,
+          "dealerUpcard": 9,
+          "playerInitialTotal": 9,
+          "netBetUnits": 0,
+          "dealerCards": [
+            { "rank": "NINE", "suit": "CLUBS", "value": 9 },
+            { "rank": "KING", "suit": "SPADES", "value": 10 }
+          ],
+          "playerHands": [
+            {
+              "bestValue": 19,
+              "betMultiplier": 1,
+              "isPair": false,
+              "isSoft": false,
+              "cards": [
+                { "rank": "SEVEN", "suit": "SPADES", "value": 7 },
+                { "rank": "TWO", "suit": "SPADES", "value": 2 },
+                { "rank": "KING", "suit": "DIAMONDS", "value": 10 }
+              ]
+            }
+          ]
+        },
+        {
+          "roundNumber": 18,
+          "result": "PLAYER_WIN",
+          "action": "STAND",
+          "dealerTotal": 26,
+          "dealerUpcard": 6,
+          "playerInitialTotal": 19,
+          "netBetUnits": 1,
+          "dealerCards": [
+            { "rank": "SIX", "suit": "DIAMONDS", "value": 6 },
+            { "rank": "TEN", "suit": "HEARTS", "value": 10 },
+            { "rank": "JACK", "suit": "DIAMONDS", "value": 10 }
+          ],
+          "playerHands": [
+            {
+              "bestValue": 19,
+              "betMultiplier": 1,
+              "isPair": false,
+              "isSoft": false,
+              "cards": [
+                { "rank": "QUEEN", "suit": "SPADES", "value": 10 },
+                { "rank": "NINE", "suit": "SPADES", "value": 9 }
+              ]
+            }
+          ]
+        },
+        {
+          "roundNumber": 19,
+          "result": "PLAYER_WIN",
+          "action": "DOUBLE",
+          "dealerTotal": 17,
+          "dealerUpcard": 10,
+          "playerInitialTotal": 11,
+          "netBetUnits": 2,
+          "dealerCards": [
+            { "rank": "JACK", "suit": "HEARTS", "value": 10 },
+            { "rank": "SEVEN", "suit": "CLUBS", "value": 7 }
+          ],
+          "playerHands": [
+            {
+              "bestValue": 20,
+              "betMultiplier": 2,
+              "isPair": false,
+              "isSoft": false,
+              "cards": [
+                { "rank": "TWO", "suit": "CLUBS", "value": 2 },
+                { "rank": "NINE", "suit": "HEARTS", "value": 9 },
+                { "rank": "NINE", "suit": "DIAMONDS", "value": 9 }
+              ]
+            }
+          ]
+        },
+        {
+          "roundNumber": 20,
+          "result": "PLAYER_WIN",
+          "action": "HIT",
+          "dealerTotal": 20,
+          "dealerUpcard": 10,
+          "playerInitialTotal": 9,
+          "netBetUnits": 1,
+          "dealerCards": [
+            { "rank": "JACK", "suit": "HEARTS", "value": 10 },
+            { "rank": "JACK", "suit": "SPADES", "value": 10 }
+          ],
+          "playerHands": [
+            {
+              "bestValue": 21,
+              "betMultiplier": 1,
+              "isPair": false,
+              "isSoft": true,
+              "cards": [
+                { "rank": "FIVE", "suit": "CLUBS", "value": 5 },
+                { "rank": "FOUR", "suit": "DIAMONDS", "value": 4 },
+                { "rank": "FOUR", "suit": "SPADES", "value": 4 },
+                { "rank": "ACE", "suit": "DIAMONDS", "value": 11 },
+                { "rank": "SEVEN", "suit": "SPADES", "value": 7 }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

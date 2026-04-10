@@ -1,41 +1,165 @@
-import statsData from "../data/statsResults.json";
+import streakStatsData from "../data/statsResults-streak.json";
 
-type StatsEntry = {
+type RawStatsResult = {
+  filter: string;
+  groupBy: string[];
+  text: string;
+};
+
+type GroupedEntry = {
+  type: "grouped";
   label: string;
   games: number;
   winRate: string;
   loseRate: string;
 };
 
-function parseStatsText(text: string): StatsEntry[] {
-  return text
+type StreakEntry = {
+  type: "streak";
+  label: string;
+  count: number;
+  percentage: string;
+};
+
+type ParsedStatsBlock = {
+  title: string;
+  entries: Array<GroupedEntry | StreakEntry>;
+};
+
+function parseGroupedEntries(lines: string[]): GroupedEntry[] {
+  return lines
+    .map((line) =>
+      line.match(
+        /^(.+?)\s*->\s*Games:\s*(\d+)\s*\|\s*Win:\s*([\d.]+%)\s*\|\s*Lose:\s*([\d.]+%)$/
+      )
+    )
+    .filter((match): match is RegExpMatchArray => match !== null)
+    .map(([, label, games, winRate, loseRate]) => ({
+      type: "grouped",
+      label,
+      games: Number(games),
+      winRate,
+      loseRate,
+    }));
+}
+
+function parseStreakEntries(lines: string[]): ParsedStatsBlock | null {
+  const [header, ...body] = lines;
+
+  if (!header.endsWith(":")) {
+    return null;
+  }
+
+  const entries = body
+    .map((line) => line.match(/^(.+?):\s*(\d+)\s+times\s+\(([\d.]+%)\)$/))
+    .filter((match): match is RegExpMatchArray => match !== null)
+    .map(([, label, count, percentage]) => ({
+      type: "streak" as const,
+      label,
+      count: Number(count),
+      percentage,
+    }));
+
+  if (entries.length === 0) {
+    return null;
+  }
+
+  return {
+    title: header.slice(0, -1),
+    entries,
+  };
+}
+
+function parseStatsBlock(result: RawStatsResult): ParsedStatsBlock {
+  const lines = result.text
     .split(/\r?\n/)
     .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => {
-      const match = line.match(
-        /^(.+?)\s*->\s*Games:\s*(\d+)\s*\|\s*Win:\s*([\d.]+%)\s*\|\s*Lose:\s*([\d.]+%)$/,
-      );
+    .filter(Boolean);
 
-      if (!match) {
-        return null;
-      }
+  const groupedEntries = parseGroupedEntries(lines);
+  if (groupedEntries.length > 0) {
+    return {
+      title: "Grouped Results",
+      entries: groupedEntries,
+    };
+  }
 
-      const [, label, games, winRate, loseRate] = match;
-      return {
-        label,
-        games: Number(games),
-        winRate,
-        loseRate,
-      };
-    })
-    .filter((entry): entry is StatsEntry => entry !== null);
+  const streakBlock = parseStreakEntries(lines);
+  if (streakBlock) {
+    return streakBlock;
+  }
+
+  return {
+    title: "Raw Stats",
+    entries: [],
+  };
+}
+
+function renderGroupedEntry(entry: GroupedEntry) {
+  return (
+    <article
+      key={entry.label}
+      className="rounded-xl border border-white/10 bg-slate-900/70 p-4"
+    >
+      <p className="text-sm font-medium text-slate-300">{entry.label}</p>
+      <p className="mt-3 text-3xl font-bold text-white">
+        {entry.games}
+        <span className="ml-2 text-sm font-medium text-slate-400">games</span>
+      </p>
+      <div className="mt-4 grid grid-cols-2 gap-3">
+        <div className="rounded-lg bg-emerald-500/10 px-3 py-3">
+          <p className="text-xs font-semibold uppercase tracking-wide text-emerald-300">
+            Win
+          </p>
+          <p className="mt-1 text-lg font-semibold text-emerald-200">
+            {entry.winRate}
+          </p>
+        </div>
+        <div className="rounded-lg bg-rose-500/10 px-3 py-3">
+          <p className="text-xs font-semibold uppercase tracking-wide text-rose-300">
+            Lose
+          </p>
+          <p className="mt-1 text-lg font-semibold text-rose-200">
+            {entry.loseRate}
+          </p>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function renderStreakEntry(entry: StreakEntry) {
+  return (
+    <article
+      key={entry.label}
+      className="rounded-xl border border-white/10 bg-slate-900/70 p-4"
+    >
+      <p className="text-sm font-medium text-slate-300">{entry.label}</p>
+      <p className="mt-3 text-3xl font-bold text-white">
+        {entry.count}
+        <span className="ml-2 text-sm font-medium text-slate-400">times</span>
+      </p>
+      <div className="mt-4 rounded-lg bg-amber-500/10 px-3 py-3">
+        <p className="text-xs font-semibold uppercase tracking-wide text-amber-300">
+          Share
+        </p>
+        <p className="mt-1 text-lg font-semibold text-amber-200">
+          {entry.percentage}
+        </p>
+      </div>
+    </article>
+  );
 }
 
 export default function StatsSummary() {
-  const summaries = statsData.statsResults.map((result) => ({
+  const allStatsResults: RawStatsResult[] = [
+    // ...groupedStatsData.statsResults,
+    ...streakStatsData.statsResults,
+  ];
+
+  const summaries = allStatsResults.map((result) => ({
     ...result,
-    entries: parseStatsText(result.text),
+    parsed: parseStatsBlock(result),
   }));
 
   return (
@@ -51,8 +175,8 @@ export default function StatsSummary() {
             </h2>
           </div>
           <p className="max-w-2xl text-sm text-slate-300">
-            Parsed from the simulation statistics output and grouped into a
-            compact comparison grid.
+            Grouped rates and streak distributions rendered from multiple stats
+            result formats.
           </p>
         </div>
 
@@ -71,6 +195,9 @@ export default function StatsSummary() {
                     <h3 className="mt-1 text-xl font-semibold text-white">
                       {summary.filter}
                     </h3>
+                    <p className="mt-2 text-sm text-slate-300">
+                      {summary.parsed.title}
+                    </p>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {summary.groupBy.map((group) => (
@@ -85,42 +212,19 @@ export default function StatsSummary() {
                 </div>
               </div>
 
-              <div className="grid gap-4 p-5 sm:grid-cols-2 xl:grid-cols-3 sm:p-6">
-                {summary.entries.map((entry) => (
-                  <article
-                    key={entry.label}
-                    className="rounded-xl border border-white/10 bg-slate-900/70 p-4"
-                  >
-                    <p className="text-sm font-medium text-slate-300">
-                      {entry.label}
-                    </p>
-                    <p className="mt-3 text-3xl font-bold text-white">
-                      {entry.games}
-                      <span className="ml-2 text-sm font-medium text-slate-400">
-                        games
-                      </span>
-                    </p>
-                    <div className="mt-4 grid grid-cols-2 gap-3">
-                      <div className="rounded-lg bg-emerald-500/10 px-3 py-3">
-                        <p className="text-xs font-semibold uppercase tracking-wide text-emerald-300">
-                          Win
-                        </p>
-                        <p className="mt-1 text-lg font-semibold text-emerald-200">
-                          {entry.winRate}
-                        </p>
-                      </div>
-                      <div className="rounded-lg bg-rose-500/10 px-3 py-3">
-                        <p className="text-xs font-semibold uppercase tracking-wide text-rose-300">
-                          Lose
-                        </p>
-                        <p className="mt-1 text-lg font-semibold text-rose-200">
-                          {entry.loseRate}
-                        </p>
-                      </div>
-                    </div>
-                  </article>
-                ))}
-              </div>
+              {summary.parsed.entries.length > 0 ? (
+                <div className="grid gap-4 p-5 sm:grid-cols-2 xl:grid-cols-3 sm:p-6">
+                  {summary.parsed.entries.map((entry) =>
+                    entry.type === "grouped"
+                      ? renderGroupedEntry(entry)
+                      : renderStreakEntry(entry)
+                  )}
+                </div>
+              ) : (
+                <div className="p-6 text-sm text-slate-400">
+                  No supported stats rows were found in this result block.
+                </div>
+              )}
             </div>
           ))}
         </div>
