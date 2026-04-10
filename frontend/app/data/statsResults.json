@@ -1,0 +1,9 @@
+{
+  "statsResults": [
+    {
+      "filter": "all games",
+      "groupBy": ["player.init"],
+      "text": "Player initial: 4 -> Games: 2 | Win: 0.0% | Lose: 50.0%\r\nPlayer initial: 5 -> Games: 7 | Win: 57.1% | Lose: 28.6%\r\nPlayer initial: 6 -> Games: 12 | Win: 58.3% | Lose: 41.7%\r\nPlayer initial: 7 -> Games: 10 | Win: 20.0% | Lose: 70.0%\r\nPlayer initial: 8 -> Games: 15 | Win: 46.7% | Lose: 40.0%\r\nPlayer initial: 9 -> Games: 23 | Win: 56.5% | Lose: 34.8%\r\nPlayer initial: 10 -> Games: 25 | Win: 56.0% | Lose: 36.0%\r\nPlayer initial: 11 -> Games: 24 | Win: 54.2% | Lose: 37.5%\r\nPlayer initial: 12 -> Games: 45 | Win: 26.7% | Lose: 48.9%\r\nPlayer initial: 13 -> Games: 50 | Win: 26.0% | Lose: 68.0%\r\nPlayer initial: 14 -> Games: 46 | Win: 37.0% | Lose: 50.0%\r\nPlayer initial: 15 -> Games: 40 | Win: 35.0% | Lose: 45.0%\r\nPlayer initial: 16 -> Games: 36 | Win: 22.2% | Lose: 66.7%\r\nPlayer initial: 17 -> Games: 42 | Win: 31.0% | Lose: 64.3%\r\nPlayer initial: 18 -> Games: 39 | Win: 35.9% | Lose: 35.9%\r\nPlayer initial: 19 -> Games: 24 | Win: 75.0% | Lose: 12.5%\r\nPlayer initial: 20 -> Games: 35 | Win: 82.9% | Lose: 5.7%\r\nPlayer initial: 21 -> Games: 25 | Win: 80.0% | Lose: 0.0%"
+    }
+  ]
+}

@@ -1,0 +1,129 @@
+{
+  "timelineResults": [
+    {
+      "filter": "all games",
+      "rounds": [
+        {
+          "roundNumber": 1,
+          "result": "PLAYER_WIN",
+          "action": "STAND",
+          "netBetUnits": 1
+        },
+        {
+          "roundNumber": 2,
+          "result": "PLAYER_WIN",
+          "action": "STAND",
+          "netBetUnits": 1
+        },
+        {
+          "roundNumber": 3,
+          "result": "DEALER_WIN",
+          "action": "STAND",
+          "netBetUnits": -1
+        },
+        {
+          "roundNumber": 4,
+          "result": "DEALER_WIN",
+          "action": "STAND",
+          "netBetUnits": -1
+        },
+        {
+          "roundNumber": 5,
+          "result": "PLAYER_WIN",
+          "action": "STAND",
+          "netBetUnits": 1
+        },
+        {
+          "roundNumber": 6,
+          "result": "DEALER_WIN",
+          "action": "HIT",
+          "netBetUnits": -2
+        },
+        {
+          "roundNumber": 7,
+          "result": "DEALER_WIN",
+          "action": "HIT",
+          "netBetUnits": -1
+        },
+        {
+          "roundNumber": 8,
+          "result": "DEALER_WIN",
+          "action": "DOUBLE",
+          "netBetUnits": -2
+        },
+        {
+          "roundNumber": 9,
+          "result": "PLAYER_WIN",
+          "action": "STAND",
+          "netBetUnits": 1
+        },
+        {
+          "roundNumber": 10,
+          "result": "PUSH",
+          "action": "DOUBLE",
+          "netBetUnits": 0
+        },
+        {
+          "roundNumber": 11,
+          "result": "DEALER_WIN",
+          "action": "STAND",
+          "netBetUnits": -1
+        },
+        {
+          "roundNumber": 12,
+          "result": "PLAYER_WIN",
+          "action": "STAND",
+          "netBetUnits": 1
+        },
+        {
+          "roundNumber": 13,
+          "result": "PLAYER_WIN",
+          "action": "STAND",
+          "netBetUnits": 1
+        },
+        {
+          "roundNumber": 14,
+          "result": "PUSH",
+          "action": "STAND",
+          "netBetUnits": 0
+        },
+        {
+          "roundNumber": 15,
+          "result": "PLAYER_WIN",
+          "action": "DOUBLE",
+          "netBetUnits": 2
+        },
+        {
+          "roundNumber": 16,
+          "result": "PLAYER_WIN",
+          "action": "STAND",
+          "netBetUnits": 1
+        },
+        {
+          "roundNumber": 17,
+          "result": "DEALER_WIN",
+          "action": "HIT",
+          "netBetUnits": -1
+        },
+        {
+          "roundNumber": 18,
+          "result": "PLAYER_WIN",
+          "action": "HIT",
+          "netBetUnits": 1
+        },
+        {
+          "roundNumber": 19,
+          "result": "PUSH",
+          "action": "STAND",
+          "netBetUnits": 0
+        },
+        {
+          "roundNumber": 20,
+          "result": "DEALER_WIN",
+          "action": "STAND",
+          "netBetUnits": -1
+        }
+      ]
+    }
+  ]
+}
