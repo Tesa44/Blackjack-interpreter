@@ -1,4 +1,5 @@
 import React from "react";
+import LayoutSection from "../layouts/LayoutSection";
 
 interface Card {
   rank: string;
@@ -167,28 +168,34 @@ const RoundResults: React.FC<RoundResultsProps> = ({ showResults }) => {
   }
 
   return (
-    <div className="space-y-6 h-screen overflow-hidden">
-      {showResults.map((filterResult: FilterResult, filterIndex: number) => (
-        <section
-          key={filterIndex}
-          className="overflow-hidden rounded-2xl border border-white/10 bg-slate-950 text-slate-50 shadow-[0_20px_60px_rgba(15,23,42,0.35)]"
-        >
-          <div className="border-b border-white/10 px-6 py-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">
-              Round Results
-            </p>
-            <h3 className="mt-2 text-2xl font-bold text-white">
-              {filterResult.filter}
-            </h3>
-          </div>
-          <div className="space-y-4 p-6 max-h-256 overflow-y-auto pr-2">
-            {filterResult.rounds.map((round: Round) => (
-              <RoundCard key={round.roundNumber} round={round} />
-            ))}
-          </div>
-        </section>
-      ))}
-    </div>
+    <LayoutSection
+      eyebrow="Round Results"
+      title="Detailed Round Results"
+      description="Use the page scrollbar to skip this section, or the internal scrollbar to inspect every round."
+    >
+      <div className="space-y-6">
+        {showResults.map((filterResult: FilterResult, filterIndex: number) => (
+          <section
+            key={filterIndex}
+            className="overflow-hidden rounded-2xl border border-white/10 bg-slate-950 text-slate-50 shadow-[0_20px_60px_rgba(15,23,42,0.35)]"
+          >
+            <div className="border-b border-white/10 px-6 py-5">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">
+                Filter
+              </p>
+              <h3 className="mt-2 text-2xl font-bold text-white">
+                {filterResult.filter}
+              </h3>
+            </div>
+            <div className="max-h-256 overflow-y-auto space-y-4 p-6 pr-2">
+              {filterResult.rounds.map((round: Round) => (
+                <RoundCard key={round.roundNumber} round={round} />
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+    </LayoutSection>
   );
 };
 

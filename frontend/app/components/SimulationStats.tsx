@@ -1,3 +1,5 @@
+import LayoutSection from "~/layouts/LayoutSection";
+
 interface SimulationStatsProps {
   data: {
     simulationData: Array<{
@@ -14,8 +16,10 @@ export default function SimulationStats({ data }: SimulationStatsProps) {
     simulationData[0].balance;
 
   return (
-    <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-[0_30px_80px_rgba(2,6,23,0.35)]">
-      <h2 className="mb-4 text-xl font-bold text-white">Simulation Stats</h2>
+    <LayoutSection
+      eyebrow="Betting summary"
+      title="Balance view and total net profit"
+    >
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <article className="rounded-xl border border-white/10 bg-slate-900/80 p-4 shadow-[0_20px_60px_rgba(15,23,42,0.2)]">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
@@ -52,6 +56,6 @@ export default function SimulationStats({ data }: SimulationStatsProps) {
           </p>
         </article>
       </div>
-    </section>
+    </LayoutSection>
   );
 }

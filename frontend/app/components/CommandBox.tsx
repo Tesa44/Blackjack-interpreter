@@ -6,7 +6,9 @@ export default function CommandBox() {
           <p className="text-sm font-medium uppercase tracking-[0.3em] text-cyan-300">
             Console
           </p>
-          <h2 className="mt-2 text-2xl font-bold text-white">Command Input</h2>
+          <h2 className="mt-2 text-2xl font-bold text-white">
+            Command Input
+          </h2>
           <p className="mt-2 text-sm text-slate-300">
             Enter filters or simulation commands without leaving the dashboard.
           </p>

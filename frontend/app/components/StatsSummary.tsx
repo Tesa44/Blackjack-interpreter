@@ -1,4 +1,6 @@
+import groupedStatsData from "../data/statsResults.json";
 import streakStatsData from "../data/statsResults-streak.json";
+import LayoutSection from "../layouts/LayoutSection";
 
 type RawStatsResult = {
   filter: string;
@@ -153,7 +155,7 @@ function renderStreakEntry(entry: StreakEntry) {
 
 export default function StatsSummary() {
   const allStatsResults: RawStatsResult[] = [
-    // ...groupedStatsData.statsResults,
+    ...groupedStatsData.statsResults,
     ...streakStatsData.statsResults,
   ];
 
@@ -163,72 +165,60 @@ export default function StatsSummary() {
   }));
 
   return (
-    <section className="bg-slate-950 px-6 py-8 text-slate-50 sm:px-8">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-6 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-sm font-medium uppercase tracking-[0.3em] text-cyan-300">
-              Stats Summary
-            </p>
-            <h2 className="mt-2 text-3xl font-bold text-white">
-              Filtered game breakdown
-            </h2>
-          </div>
-          <p className="max-w-2xl text-sm text-slate-300">
-            Grouped rates and streak distributions rendered from multiple stats
-            result formats.
-          </p>
-        </div>
-
-        <div className="space-y-6">
-          {summaries.map((summary, index) => (
-            <div
-              key={`${summary.filter}-${index}`}
-              className="overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-[0_20px_60px_rgba(15,23,42,0.35)]"
-            >
-              <div className="border-b border-white/10 px-5 py-4 sm:px-6">
-                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                      Filter
-                    </p>
-                    <h3 className="mt-1 text-xl font-semibold text-white">
-                      {summary.filter}
-                    </h3>
-                    <p className="mt-2 text-sm text-slate-300">
-                      {summary.parsed.title}
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {summary.groupBy.map((group) => (
-                      <span
-                        key={group}
-                        className="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-xs font-medium text-cyan-200"
-                      >
-                        Grouped by {group}
-                      </span>
-                    ))}
-                  </div>
+    <LayoutSection
+      eyebrow="Stats Summary"
+      title="Filtered game breakdown"
+      description="Grouped rates and streak distributions rendered from multiple stats result formats."
+      headerClassName="lg:items-end"
+    >
+      <div className="space-y-6">
+        {summaries.map((summary, index) => (
+          <div
+            key={`${summary.filter}-${index}`}
+            className="overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-[0_20px_60px_rgba(15,23,42,0.35)]"
+          >
+            <div className="border-b border-white/10 px-5 py-4 sm:px-6">
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                    Filter
+                  </p>
+                  <h3 className="mt-1 text-xl font-semibold text-white">
+                    {summary.filter}
+                  </h3>
+                  <p className="mt-2 text-sm text-slate-300">
+                    {summary.parsed.title}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {summary.groupBy.map((group) => (
+                    <span
+                      key={group}
+                      className="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-xs font-medium text-cyan-200"
+                    >
+                      Grouped by {group}
+                    </span>
+                  ))}
                 </div>
               </div>
-
-              {summary.parsed.entries.length > 0 ? (
-                <div className="grid gap-4 p-5 sm:grid-cols-2 xl:grid-cols-3 sm:p-6">
-                  {summary.parsed.entries.map((entry) =>
-                    entry.type === "grouped"
-                      ? renderGroupedEntry(entry)
-                      : renderStreakEntry(entry)
-                  )}
-                </div>
-              ) : (
-                <div className="p-6 text-sm text-slate-400">
-                  No supported stats rows were found in this result block.
-                </div>
-              )}
             </div>
-          ))}
-        </div>
+
+            {summary.parsed.entries.length > 0 ? (
+              <div className="grid gap-4 p-5 sm:grid-cols-2 xl:grid-cols-3 sm:p-6">
+                {summary.parsed.entries.map((entry) =>
+                  entry.type === "grouped"
+                    ? renderGroupedEntry(entry)
+                    : renderStreakEntry(entry)
+                )}
+              </div>
+            ) : (
+              <div className="p-6 text-sm text-slate-400">
+                No supported stats rows were found in this result block.
+              </div>
+            )}
+          </div>
+        ))}
       </div>
-    </section>
+    </LayoutSection>
   );
 }

@@ -5,6 +5,7 @@ import StatsSummary from "../components/StatsSummary";
 import TimelineSummary from "~/components/TimelineSummary";
 import { showResults } from "../data/showResults.json";
 import TopSection from "~/components/TopSection";
+import CommandBoxLayout from "../layouts/CommandBoxLayout";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -24,11 +25,9 @@ export default function Home() {
           <TimelineSummary />
         </main>
 
-        <aside className="hidden min-w-0 lg:block lg:shrink-0">
-          <div className="fixed lg:top-6 lg:right-8 w-[calc(20%-0.75rem)]">
+        <CommandBoxLayout>
             <CommandBox />
-          </div>
-        </aside>
+        </CommandBoxLayout>
       </div>
     </div>
   );
