@@ -1,36 +1,6 @@
 import React from "react";
 import LayoutSection from "../layouts/LayoutSection";
-
-interface Card {
-  rank: string;
-  suit: string;
-  value: number;
-}
-
-interface PlayerHand {
-  bestValue: number;
-  betMultiplier: number;
-  isPair: boolean;
-  isSoft: boolean;
-  cards: Card[];
-}
-
-interface Round {
-  roundNumber: number;
-  result: string;
-  action: string;
-  dealerTotal: number;
-  dealerUpcard: number;
-  playerInitialTotal: number;
-  netBetUnits: number;
-  dealerCards: Card[];
-  playerHands: PlayerHand[];
-}
-
-interface FilterResult {
-  filter: string;
-  rounds: Round[];
-}
+import type { Card, FilterResult, PlayerHand, Round } from "~/types/simulation";
 
 interface RoundResultsProps {
   showResults: FilterResult[];

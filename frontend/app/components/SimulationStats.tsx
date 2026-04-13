@@ -11,6 +11,19 @@ interface SimulationStatsProps {
 
 export default function SimulationStats({ data }: SimulationStatsProps) {
   const simulationData = data.simulationData;
+  if (simulationData.length === 0) {
+    return (
+      <LayoutSection
+        eyebrow="Betting summary"
+        title="Balance view and total net profit"
+      >
+        <div className="rounded-xl border border-white/10 bg-slate-900/80 px-6 py-8 text-center text-slate-300">
+          Stats will appear after running a simulation command.
+        </div>
+      </LayoutSection>
+    );
+  }
+
   const netProfit =
     simulationData[simulationData.length - 1].balance -
     simulationData[0].balance;
