@@ -1,0 +1,191 @@
+{
+    "summary": {
+        "simulationMode": "SIMULATE_ROUNDS",
+        "roundsPlayed": 15,
+        "playerWins": 10,
+        "dealerWins": 4,
+        "pushes": 1,
+        "initialBalance": 1000,
+        "betPerGame": 100,
+        "finalBalance": 1600
+    },
+    "showResults": [
+        {
+            "filter": "player.total = 21",
+            "rounds": [
+                {
+                    "roundNumber": 7,
+                    "result": "PLAYER_WIN",
+                    "action": "HIT",
+                    "dealerTotal": 20,
+                    "dealerUpcard": 11,
+                    "playerInitialTotal": 11,
+                    "netBetUnits": 1,
+                    "dealerCards": [
+                        {
+                            "rank": "ACE",
+                            "suit": "HEARTS",
+                            "value": 11
+                        },
+                        {
+                            "rank": "NINE",
+                            "suit": "CLUBS",
+                            "value": 9
+                        }
+                    ],
+                    "playerHands": [
+                        {
+                            "bestValue": 21,
+                            "betMultiplier": 1,
+                            "isPair": false,
+                            "isSoft": false,
+                            "cards": [
+                                {
+                                    "rank": "NINE",
+                                    "suit": "HEARTS",
+                                    "value": 9
+                                },
+                                {
+                                    "rank": "TWO",
+                                    "suit": "DIAMONDS",
+                                    "value": 2
+                                },
+                                {
+                                    "rank": "QUEEN",
+                                    "suit": "HEARTS",
+                                    "value": 10
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "statsResults": [
+        {
+            "filter": "all games",
+            "groupBy": [
+                "player.streaks"
+            ],
+            "text": "Player streaks:\r\nStreak 1: 2 times (40.0%)\r\nStreak 2: 2 times (40.0%)\r\nStreak 4: 1 times (20.0%)"
+        }
+    ],
+    "timelineResults": [
+        {
+            "filter": "all games",
+            "rounds": [
+                {
+                    "roundNumber": 1,
+                    "result": "DEALER_WIN",
+                    "action": "STAND",
+                    "netBetUnits": -1
+                },
+                {
+                    "roundNumber": 2,
+                    "result": "PLAYER_WIN",
+                    "action": "STAND",
+                    "netBetUnits": 1
+                },
+                {
+                    "roundNumber": 3,
+                    "result": "DEALER_WIN",
+                    "action": "DOUBLE",
+                    "netBetUnits": -2
+                },
+                {
+                    "roundNumber": 4,
+                    "result": "PLAYER_WIN",
+                    "action": "HIT",
+                    "netBetUnits": 1
+                },
+                {
+                    "roundNumber": 5,
+                    "result": "PLAYER_WIN",
+                    "action": "STAND",
+                    "netBetUnits": 1
+                },
+                {
+                    "roundNumber": 6,
+                    "result": "DEALER_WIN",
+                    "action": "STAND",
+                    "netBetUnits": -1
+                },
+                {
+                    "roundNumber": 7,
+                    "result": "PLAYER_WIN",
+                    "action": "HIT",
+                    "netBetUnits": 1
+                },
+                {
+                    "roundNumber": 8,
+                    "result": "DEALER_WIN",
+                    "action": "STAND",
+                    "netBetUnits": -1
+                },
+                {
+                    "roundNumber": 9,
+                    "result": "PLAYER_WIN",
+                    "action": "STAND",
+                    "netBetUnits": 1
+                },
+                {
+                    "roundNumber": 10,
+                    "result": "PLAYER_WIN",
+                    "action": "HIT",
+                    "netBetUnits": 1
+                },
+                {
+                    "roundNumber": 11,
+                    "result": "PLAYER_WIN",
+                    "action": "HIT",
+                    "netBetUnits": 1
+                },
+                {
+                    "roundNumber": 12,
+                    "result": "PLAYER_WIN",
+                    "action": "STAND",
+                    "netBetUnits": 1
+                },
+                {
+                    "roundNumber": 13,
+                    "result": "PUSH",
+                    "action": "HIT",
+                    "netBetUnits": 0
+                },
+                {
+                    "roundNumber": 14,
+                    "result": "PLAYER_WIN",
+                    "action": "HIT",
+                    "netBetUnits": 1
+                },
+                {
+                    "roundNumber": 15,
+                    "result": "PLAYER_WIN",
+                    "action": "DOUBLE",
+                    "netBetUnits": 2
+                }
+            ]
+        }
+    ],
+    "plot": {
+        "balanceHistory": [
+            1000,
+            900,
+            1000,
+            800,
+            900,
+            1000,
+            900,
+            1000,
+            900,
+            1000,
+            1100,
+            1200,
+            1300,
+            1300,
+            1400,
+            1600
+        ]
+    }
+}

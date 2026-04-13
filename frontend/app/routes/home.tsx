@@ -6,13 +6,8 @@ import StatsSummary from "../components/StatsSummary";
 import TimelineSummary from "~/components/TimelineSummary";
 import TopSection from "~/components/TopSection";
 import CommandBoxLayout from "../layouts/CommandBoxLayout";
-import blackjackSimulationData from "../data/blackjackSimulation.json";
-import showResultsData from "../data/showResults.json";
-import timelineSimulationData from "../data/timelineSimulation.json";
-import groupedStatsData from "../data/statsResults.json";
-import streakStatsData from "../data/statsResults-streak.json";
-import { normalizeSimulationResponse } from "~/lib/simulationResponse";
-import type { DashboardData } from "~/types/simulation";
+import dataFromApi from "../data/data-from-api.json";
+import type { ApiSimulationResponse } from "~/types/simulation";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -22,15 +17,7 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
-  const [dashboardData, setDashboardData] = useState<DashboardData>({
-    simulationData: blackjackSimulationData.simulationData,
-    showResults: showResultsData.showResults,
-    timelineResults: timelineSimulationData.timelineResults,
-    statsResults: [
-      ...groupedStatsData.statsResults,
-      ...streakStatsData.statsResults,
-    ],
-  });
+  const [dashboardData, setDashboardData] = useState<ApiSimulationResponse>(dataFromApi);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -51,14 +38,8 @@ export default function Home() {
         throw new Error(`Request failed: ${response.status} ${response.statusText}`);
       }
 
-      const contentType = response.headers.get("content-type") ?? "";
-      const responseBody = contentType.includes("application/json")
-        ? await response.json()
-        : await response.text();
-
-      setDashboardData((previousData) =>
-        normalizeSimulationResponse(responseBody, previousData)
-      );
+      const data: ApiSimulationResponse = await response.json();
+      setDashboardData(data);
     } catch (error) {
       const fallbackMessage =
         error instanceof Error
@@ -74,10 +55,18 @@ export default function Home() {
     <div className="min-h-screen w-full max-w-full bg-slate-950 relative">
       <div className="mx-auto max-w-[1800px] gap-6 px-4 py-6 sm:px-6 lg:flex lg:items-start lg:gap-6 lg:px-8">
         <main className="min-w-0 space-y-6 lg:w-[calc(80%-0.75rem)]">
-          <TopSection simulationData={dashboardData.simulationData} />
-          <StatsSummary statsResults={dashboardData.statsResults} />
-          <RoundResults showResults={dashboardData.showResults} />
-          <TimelineSummary timelineResults={dashboardData.timelineResults} />
+          {(dashboardData.plot || dashboardData.summary) ? (
+            <TopSection plot={dashboardData.plot} summary={dashboardData.summary} />
+          ) : null}
+          {dashboardData.statsResults ? (
+            <StatsSummary statsResults={dashboardData.statsResults} />
+          ) : null}
+          {dashboardData.showResults ? (
+            <RoundResults showResults={dashboardData.showResults} />
+          ) : null}
+          {dashboardData.timelineResults ? (
+            <TimelineSummary timelineResults={dashboardData.timelineResults} />
+          ) : null}
         </main>
 
         <CommandBoxLayout>

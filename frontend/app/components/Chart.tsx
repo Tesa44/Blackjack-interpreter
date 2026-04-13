@@ -8,16 +8,18 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import type { SimulationPoint } from "~/types/simulation";
+import type { SimulationPlot } from "~/types/simulation";
 
 interface ChartProps {
-  data: {
-    simulationData: SimulationPoint[];
-  };
+  plot: SimulationPlot;
 }
 
-export default function Chart({ data }: ChartProps) {
-  const hasData = data.simulationData.length > 0;
+export default function Chart({ plot }: ChartProps) {
+  const chartData = plot.balanceHistory.map((balance, index) => ({
+    round: index,
+    balance,
+  }));
+  const hasData = chartData.length > 0;
 
   return (
     <section className="rounded-[2rem] border border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(34,211,238,0.14),_transparent_40%),linear-gradient(180deg,rgba(15,23,42,0.96),rgba(2,6,23,0.98))] p-6 shadow-[0_30px_80px_rgba(2,6,23,0.45)] sm:p-8">
@@ -33,7 +35,7 @@ export default function Chart({ data }: ChartProps) {
         <div className="rounded-2xl border border-white/10 bg-slate-900/80 p-4 shadow-[0_20px_60px_rgba(15,23,42,0.35)] sm:p-6">
           <ResponsiveContainer width="100%" height={400}>
             <LineChart
-              data={data.simulationData}
+              data={chartData}
               margin={{ top: 12, right: 20, left: 8, bottom: 12 }}
             >
               <CartesianGrid

@@ -1,32 +1,12 @@
 import LayoutSection from "~/layouts/LayoutSection";
+import type { SimulationSummary } from "~/types/simulation";
 
 interface SimulationStatsProps {
-  data: {
-    simulationData: Array<{
-      balance: number;
-      round: number;
-    }>;
-  };
+  summary: SimulationSummary;
 }
 
-export default function SimulationStats({ data }: SimulationStatsProps) {
-  const simulationData = data.simulationData;
-  if (simulationData.length === 0) {
-    return (
-      <LayoutSection
-        eyebrow="Betting summary"
-        title="Balance view and total net profit"
-      >
-        <div className="rounded-xl border border-white/10 bg-slate-900/80 px-6 py-8 text-center text-slate-300">
-          Stats will appear after running a simulation command.
-        </div>
-      </LayoutSection>
-    );
-  }
-
-  const netProfit =
-    simulationData[simulationData.length - 1].balance -
-    simulationData[0].balance;
+export default function SimulationStats({ summary }: SimulationStatsProps) {
+  const netProfit = summary.finalBalance - summary.initialBalance;
 
   return (
     <LayoutSection
@@ -39,7 +19,7 @@ export default function SimulationStats({ data }: SimulationStatsProps) {
             Total Rounds
           </p>
           <p className="mt-3 text-3xl font-bold text-white">
-            {simulationData.length}
+            {summary.roundsPlayed}
           </p>
         </article>
         <article className="rounded-xl border border-white/10 bg-slate-900/80 p-4 shadow-[0_20px_60px_rgba(15,23,42,0.2)]">
@@ -47,7 +27,7 @@ export default function SimulationStats({ data }: SimulationStatsProps) {
             Starting Balance
           </p>
           <p className="mt-3 text-3xl font-bold text-white">
-            ${simulationData[0].balance}
+            ${summary.initialBalance}
           </p>
         </article>
         <article className="rounded-xl border border-white/10 bg-slate-900/80 p-4 shadow-[0_20px_60px_rgba(15,23,42,0.2)]">
@@ -55,7 +35,7 @@ export default function SimulationStats({ data }: SimulationStatsProps) {
             Final Balance
           </p>
           <p className="mt-3 text-3xl font-bold text-white">
-            ${simulationData[simulationData.length - 1].balance}
+            ${summary.finalBalance}
           </p>
         </article>
         <article className="rounded-xl border border-white/10 bg-slate-900/80 p-4 shadow-[0_20px_60px_rgba(15,23,42,0.2)]">

@@ -47,14 +47,25 @@ export interface RawStatsResult {
   text: string;
 }
 
-export interface SimulationPoint {
-  round: number;
-  balance: number;
+export interface SimulationSummary {
+  simulationMode: string;
+  roundsPlayed: number;
+  playerWins: number;
+  dealerWins: number;
+  pushes: number;
+  initialBalance: number;
+  betPerGame: number;
+  finalBalance: number;
 }
 
-export interface DashboardData {
-  simulationData: SimulationPoint[];
-  showResults: FilterResult[];
-  timelineResults: TimelineResult[];
-  statsResults: RawStatsResult[];
+export interface SimulationPlot {
+  balanceHistory: number[];
+}
+
+export interface ApiSimulationResponse {
+  summary?: SimulationSummary;
+  showResults?: FilterResult[];
+  statsResults?: RawStatsResult[];
+  timelineResults?: TimelineResult[];
+  plot?: SimulationPlot;
 }
