@@ -41,10 +41,52 @@ export interface TimelineResult {
   rounds: TimelineRound[];
 }
 
+export interface SummaryActionStats {
+  action: string;
+  count: number;
+  wins: number;
+  winRate: number;
+}
+
+export interface SummaryStats {
+  totalGames: number;
+  playerWins: number;
+  dealerWins: number;
+  draws: number;
+  playerWinRate: number;
+  dealerWinRate: number;
+  drawRate: number;
+  playerBustRate: number;
+  dealerBustRate: number;
+  actionStats: SummaryActionStats[];
+}
+
+export interface GroupedStatsEntry {
+  label: string;
+  games: number;
+  winRate: number;
+  loseRate: number;
+}
+
+export interface StreakEntry {
+  length: number;
+  count: number;
+  percentage: number;
+}
+
+export interface StreakStats {
+  sideLabel: string;
+  totalStreaks: number;
+  entries: StreakEntry[];
+}
+
 export interface RawStatsResult {
   filter: string;
   groupBy: string[];
-  text: string;
+  summary?: SummaryStats | null;
+  groupedEntries?: GroupedStatsEntry[] | null;
+  streakStats?: StreakStats | null;
+  text?: string;
 }
 
 export interface SimulationSummary {
