@@ -19,18 +19,13 @@ public class DslExecutionService {
 
         ParseTree tree = parser.program();
         BooleanVisitor visitor = new BooleanVisitor();
-        Object consoleOutput = visitor.visit(tree);
+        visitor.visit(tree);
 
         if (!Files.exists(FRONTEND_JSON_PATH)) {
             throw new IllegalStateException("No frontend JSON was generated. Run a simulation command first.");
         }
 
         String jsonOutput = Files.readString(FRONTEND_JSON_PATH, StandardCharsets.UTF_8);
-        return new DslExecutionResult(consoleOutput.toString(), jsonOutput);
-    }
-
-    public String executeFile(Path dslPath) throws IOException {
-        String dsl = Files.readString(dslPath, StandardCharsets.UTF_8);
-        return execute(dsl).getConsoleOutput();
+        return new DslExecutionResult(jsonOutput);
     }
 }

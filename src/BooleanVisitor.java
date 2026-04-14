@@ -4,21 +4,15 @@ import blackjack.engine.RoundResult;
 import blackjack.engine.Rank;
 import blackjack.query.Filter;
 import blackjack.query.GroupByClassifier;
-import blackjack.query.PlotBalanceCommand;
-import blackjack.query.StatsCommand;
-import blackjack.query.TimelineCommand;
-import blackjack.sim.BalancePlotter;
 import blackjack.sim.FrontendExportData;
-import blackjack.sim.GroupedStatisticsPrinter;
 import blackjack.sim.SimulationConfig;
 import blackjack.sim.SimulationResult;
 import blackjack.sim.SimulationResultJsonExporter;
 import blackjack.sim.SimulationRunner;
+import blackjack.sim.StreakStatistics;
 import blackjack.sim.StreakStatisticsCalculator;
-import blackjack.sim.StreakStatisticsPrinter;
+import blackjack.sim.Statistics;
 import blackjack.sim.StatisticsCalculator;
-import blackjack.sim.StatisticsPrinter;
-import blackjack.sim.TimelinePrinter;
 import blackjack.strategy.Action;
 import blackjack.strategy.BasicStrategyConfig;
 import blackjack.strategy.Rule;
@@ -30,14 +24,14 @@ import blackjack.strategy.condition.PlayerCondition;
 import blackjack.strategy.condition.SoftCondition;
 import blackjack.strategy.condition.TotalCondition;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.function.Predicate;
 
 public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
@@ -56,28 +50,15 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
                 : asStrategy(visit(ctx.strategyBlock()));
         frontendExportData = new FrontendExportData();
 
-        StringBuilder output = new StringBuilder();
         for (ExprParser.StatContext statContext : ctx.stat()) {
-            String statementResult = asString(visit(statContext));
-            if (statementResult == null || statementResult.isBlank()) {
-                continue;
-            }
-
-            if (!output. isEmpty()) {
-                output.append(System.lineSeparator()).append(System.lineSeparator());
-            }
-            output.append(statementResult);
+            visit(statContext);
         }
 
         if (lastSimulationResult != null && frontendExportData.getSummary() != null) {
-            String exportPath = simulationResultJsonExporter.export(frontendExportData);
-            if (!output.isEmpty()) {
-                output.append(System.lineSeparator()).append(System.lineSeparator());
-            }
-            output.append("Frontend JSON saved to ").append(exportPath);
+            simulationResultJsonExporter.export(frontendExportData);
         }
 
-        return output.toString();
+        return "";
     }
 
 
@@ -99,13 +80,13 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
     @Override
     public String visitSet_balance_stat(ExprParser.Set_balance_statContext ctx) {
         configuredInitialBalance = Integer.parseInt(ctx.INT().getText());
-        return "Initial balance set to " + configuredInitialBalance;
+        return "";
     }
 
     @Override
     public String visitSet_bet_stat(ExprParser.Set_bet_statContext ctx) {
         configuredBetPerGame = Integer.parseInt(ctx.INT().getText());
-        return "Bet per game set to " + configuredBetPerGame;
+        return "";
     }
 
     @Override
@@ -114,12 +95,10 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
             return "No simulation results available. Run 'simulate ... rounds;' first.";
         }
 
-        PlotBalanceCommand plotBalanceCommand = new PlotBalanceCommand(new BalancePlotter());
-        String outputPath = plotBalanceCommand.execute(lastSimulationResult);
         frontendExportData.setPlotResult(
                 new FrontendExportData.PlotResult(new ArrayList<>(lastSimulationResult.getBalanceHistory()))
         );
-        return "Balance plot saved to " + outputPath;
+        return "";
     }
 
 
@@ -223,12 +202,7 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
         SimulationRunner runner = new SimulationRunner(config, game, strategy);
         lastSimulationResult = runner.run();
         resetFrontendExport("SIMULATE_ROUNDS");
-
-        return "Simulated " + rounds + " rounds -> "
-                + "playerWins=" + lastSimulationResult.getPlayerWins() + ", "
-                + "dealerWins=" + lastSimulationResult.getDealerWins() + ", "
-                + "pushes=" + lastSimulationResult.getPushes() + ", "
-                + "balance=" + lastSimulationResult.getFinalBalance();
+        return "";
     }
 
     private String runSimulationUntilTarget(int targetBalance, Strategy strategy) {
@@ -242,14 +216,7 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
         SimulationRunner runner = new SimulationRunner(config, game, strategy);
         lastSimulationResult = runner.run();
         resetFrontendExport("SIMULATE_UNTIL_TARGET");
-
-        return "Simulated until balance reached "
-                + targetBalance
-                + " or bankroll was exhausted -> rounds=" + lastSimulationResult.getRoundResults().size()
-                + ", playerWins=" + lastSimulationResult.getPlayerWins()
-                + ", dealerWins=" + lastSimulationResult.getDealerWins()
-                + ", pushes=" + lastSimulationResult.getPushes()
-                + ", balance=" + lastSimulationResult.getFinalBalance();
+        return "";
     }
 
     private String runSimulationUntilBroke(Strategy strategy) {
@@ -263,12 +230,7 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
         SimulationRunner runner = new SimulationRunner(config, game, strategy);
         lastSimulationResult = runner.run();
         resetFrontendExport("SIMULATE_UNTIL_BROKE");
-
-        return "Simulated until bankroll was exhausted -> rounds=" + lastSimulationResult.getRoundResults().size()
-                + ", playerWins=" + lastSimulationResult.getPlayerWins()
-                + ", dealerWins=" + lastSimulationResult.getDealerWins()
-                + ", pushes=" + lastSimulationResult.getPushes()
-                + ", balance=" + lastSimulationResult.getFinalBalance();
+        return "";
     }
 
     @Override
@@ -281,7 +243,7 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
             frontendExportData.getShowResults().add(
                     new FrontendExportData.ShowResult("all games", buildRoundViews(lastSimulationResult.getRoundResults()))
             );
-            return renderAllRounds();
+            return "";
         }
 
         Filter filter = createFilter(ctx.conditionExpr());
@@ -289,7 +251,7 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
         frontendExportData.getShowResults().add(
                 new FrontendExportData.ShowResult(describeCondition(ctx.conditionExpr()), buildRoundViews(filteredResults))
         );
-        return renderFilteredRounds(describeCondition(ctx.conditionExpr()), filteredResults);
+        return "";
     }
 
     @Override
@@ -298,35 +260,10 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
             return "No simulation results available. Run 'simulate ... rounds;' first.";
         }
 
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
         Filter filter = createFilter(ctx.conditionExpr());
-        StatsCommand statsCommand = new StatsCommand(
-                filter,
-                new StatisticsCalculator(),
-                new StatisticsPrinter(new PrintStream(output)),
-                new GroupedStatisticsPrinter(new PrintStream(output)),
-                new StreakStatisticsCalculator(),
-                new StreakStatisticsPrinter(new PrintStream(output))
-        );
-        if (ctx.groupPropertyList() == null) {
-            statsCommand.execute(lastSimulationResult.getRoundResults());
-        } else {
-            statsCommand.execute(
-                    lastSimulationResult.getRoundResults(),
-                    new GroupByClassifier(asPropertyList(visit(ctx.groupPropertyList())))
-            );
-        }
-        String statsText = output.toString().trim();
-        frontendExportData.getStatsResults().add(
-                new FrontendExportData.StatsResult(
-                        ctx.conditionExpr() == null ? "all games" : describeCondition(ctx.conditionExpr()),
-                        ctx.groupPropertyList() == null
-                                ? Collections.emptyList()
-                                : new ArrayList<>(asPropertyList(visit(ctx.groupPropertyList()))),
-                        statsText
-                )
-        );
-        return statsText;
+        List<RoundResult> filteredResults = filter.apply(lastSimulationResult.getRoundResults());
+        frontendExportData.getStatsResults().add(buildStatsResult(ctx, filteredResults));
+        return "";
     }
 
     @Override
@@ -335,21 +272,15 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
             return "No simulation results available. Run 'simulate ... rounds;' first.";
         }
 
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
         Filter filter = createFilter(ctx.conditionExpr());
         List<RoundResult> filteredResults = filter.apply(lastSimulationResult.getRoundResults());
-        TimelineCommand timelineCommand = new TimelineCommand(
-                filter,
-                new TimelinePrinter(new PrintStream(output))
-        );
-        timelineCommand.execute(lastSimulationResult.getRoundResults());
         frontendExportData.getTimelineResults().add(
                 new FrontendExportData.TimelineResult(
                         ctx.conditionExpr() == null ? "all games" : describeCondition(ctx.conditionExpr()),
                         buildRoundViews(filteredResults)
                 )
         );
-        return output.toString().trim();
+        return "";
     }
 
     @Override
@@ -447,42 +378,6 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
         return properties;
     }
 
-    private String renderFilteredRounds(String conditionText, List<RoundResult> filteredResults) {
-        StringBuilder output = new StringBuilder();
-        int matches = 0;
-        Set<RoundResult> matchedResults = new HashSet<>(filteredResults);
-
-        List<RoundResult> allResults = lastSimulationResult.getRoundResults();
-        for (int i = 0; i < allResults.size(); i++) {
-            RoundResult roundResult = allResults.get(i);
-            if (!matchedResults.contains(roundResult)) {
-                continue;
-            }
-
-            if (matches == 0) {
-                output.append("Filtered results for ")
-                        .append(conditionText)
-                        .append(":")
-                        .append(System.lineSeparator());
-            } else {
-                output.append(System.lineSeparator());
-            }
-
-            output.append("Game #").append(i + 1).append(System.lineSeparator());
-            output.append(roundResult.describeRoundSummary());
-            matches++;
-        }
-
-        if (matches == 0) {
-            return "No games matched " + conditionText + ".";
-        }
-
-        output.append(System.lineSeparator())
-                .append("Matched games: ")
-                .append(matches);
-        return output.toString();
-    }
-
     private Filter createFilter(ExprParser.ConditionExprContext ctx) {
         if (ctx == null) {
             return new Filter(roundResult -> true);
@@ -552,29 +447,6 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
             case "<=" -> actualValue <= targetValue;
             default -> throw new IllegalArgumentException("Unsupported comparison operator: " + operator);
         };
-    }
-
-    private String renderAllRounds() {
-        StringBuilder output = new StringBuilder();
-        List<RoundResult> roundResults = lastSimulationResult.getRoundResults();
-
-        if (roundResults.isEmpty()) {
-            return "No games were recorded in the last simulation.";
-        }
-
-        output.append("All game results:").append(System.lineSeparator());
-        for (int i = 0; i < roundResults.size(); i++) {
-            if (i > 0) {
-                output.append(System.lineSeparator());
-            }
-            output.append("Game #").append(i + 1).append(System.lineSeparator());
-            output.append(roundResults.get(i).describeRoundSummary());
-        }
-
-        output.append(System.lineSeparator())
-                .append("Total games: ")
-                .append(roundResults.size());
-        return output.toString();
     }
 
     private String describeCondition(ExprParser.ConditionExprContext ctx) {
@@ -688,6 +560,109 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
         return new CompositeCondition(conditions);
     }
 
+    private FrontendExportData.StatsResult buildStatsResult(
+            ExprParser.Stats_statContext ctx,
+            List<RoundResult> filteredResults
+    ) {
+        List<String> groupBy = ctx.groupPropertyList() == null
+                ? Collections.emptyList()
+                : new ArrayList<>(asPropertyList(visit(ctx.groupPropertyList())));
+        GroupByClassifier classifier = groupBy.isEmpty() ? null : new GroupByClassifier(groupBy);
+
+        FrontendExportData.SummaryStats summary = null;
+        List<FrontendExportData.GroupedStatsEntry> groupedEntries = null;
+        FrontendExportData.StreakStats streakStats = null;
+
+        if (classifier == null) {
+            summary = toSummaryStats(new StatisticsCalculator().calculate(filteredResults));
+        } else if (classifier.isPlayerStreakGrouping()) {
+            streakStats = toStreakStats("Player", new StreakStatisticsCalculator().calculatePlayerStreaks(filteredResults));
+        } else if (classifier.isDealerStreakGrouping()) {
+            streakStats = toStreakStats("Dealer", new StreakStatisticsCalculator().calculateDealerStreaks(filteredResults));
+        } else {
+            groupedEntries = buildGroupedStats(classifier, filteredResults);
+        }
+
+        return new FrontendExportData.StatsResult(
+                ctx.conditionExpr() == null ? "all games" : describeCondition(ctx.conditionExpr()),
+                groupBy,
+                summary,
+                groupedEntries,
+                streakStats
+        );
+    }
+
+    private FrontendExportData.SummaryStats toSummaryStats(Statistics statistics) {
+        int totalGames = statistics.getTotalGames();
+        List<FrontendExportData.ActionStats> actionStats = new ArrayList<>();
+        for (Action action : Action.values()) {
+            int count = statistics.getActionCounts().getOrDefault(action, 0);
+            int wins = statistics.getActionWins().getOrDefault(action, 0);
+            double winRate = count == 0 ? 0.0 : (double) wins / count;
+            actionStats.add(new FrontendExportData.ActionStats(action.name(), count, wins, winRate));
+        }
+
+        return new FrontendExportData.SummaryStats(
+                totalGames,
+                statistics.getPlayerWins(),
+                statistics.getDealerWins(),
+                statistics.getDraws(),
+                statistics.getPlayerWinRate(),
+                statistics.getDealerWinRate(),
+                statistics.getDrawRate(),
+                rate(statistics.getPlayerBusts(), totalGames),
+                rate(statistics.getDealerBusts(), totalGames),
+                actionStats
+        );
+    }
+
+    private List<FrontendExportData.GroupedStatsEntry> buildGroupedStats(
+            GroupByClassifier classifier,
+            List<RoundResult> filteredResults
+    ) {
+        Map<GroupByClassifier.GroupKey, List<RoundResult>> groupedResults = new TreeMap<>();
+        for (RoundResult result : filteredResults) {
+            GroupByClassifier.GroupKey groupKey = classifier.classify(result);
+            groupedResults.computeIfAbsent(groupKey, ignored -> new ArrayList<>()).add(result);
+        }
+
+        List<FrontendExportData.GroupedStatsEntry> groupedEntries = new ArrayList<>();
+        StatisticsCalculator statisticsCalculator = new StatisticsCalculator();
+        for (Map.Entry<GroupByClassifier.GroupKey, List<RoundResult>> entry : groupedResults.entrySet()) {
+            Statistics statistics = statisticsCalculator.calculate(entry.getValue());
+            groupedEntries.add(
+                    new FrontendExportData.GroupedStatsEntry(
+                            entry.getKey().label(),
+                            statistics.getTotalGames(),
+                            statistics.getPlayerWinRate(),
+                            statistics.getDealerWinRate()
+                    )
+            );
+        }
+        return groupedEntries;
+    }
+
+    private FrontendExportData.StreakStats toStreakStats(String sideLabel, StreakStatistics streakStatistics) {
+        List<FrontendExportData.StreakEntry> entries = new ArrayList<>();
+        for (Map.Entry<Integer, Integer> entry : streakStatistics.getStreakCounts().entrySet()) {
+            entries.add(
+                    new FrontendExportData.StreakEntry(
+                            entry.getKey(),
+                            entry.getValue(),
+                            streakStatistics.getRate(entry.getKey())
+                    )
+            );
+        }
+        return new FrontendExportData.StreakStats(sideLabel, streakStatistics.getTotalStreaks(), entries);
+    }
+
+    private double rate(int count, int total) {
+        if (total == 0) {
+            return 0.0;
+        }
+        return (double) count / total;
+    }
+
 
 
     private Strategy asStrategy(Object value) {
@@ -729,10 +704,6 @@ public class BooleanVisitor extends ExprParserBaseVisitor<Object> {
 
     private Action asAction(Object value) {
         return (Action) value;
-    }
-
-    private String asString(Object value) {
-        return (String) value;
     }
 
     @SuppressWarnings("unchecked")
