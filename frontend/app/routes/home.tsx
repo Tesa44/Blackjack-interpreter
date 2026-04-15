@@ -54,7 +54,7 @@ export default function Home() {
   return (
     <div className="min-h-screen w-full max-w-full bg-slate-950 relative">
       <div className="mx-auto max-w-[1800px] gap-6 px-4 py-6 sm:px-6 lg:flex lg:items-start lg:gap-6 lg:px-8">
-        <main className="min-w-0 space-y-6 lg:w-[calc(80%-0.75rem)]">
+        <main className="min-w-0 space-y-6 lg:w-[calc(70%-0.75rem)]">
           {(dashboardData.plot || dashboardData.summary) ? (
             <TopSection plot={dashboardData.plot} summary={dashboardData.summary} />
           ) : null}
