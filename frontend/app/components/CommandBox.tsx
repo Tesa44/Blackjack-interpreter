@@ -33,7 +33,8 @@ const SAMPLE_COMMAND = `strategy {
 }
 set balance 250;
 set bet 25;
-simulate until 1000;
+simulate until 500;
+show games where player.total = 21 and dealer.total in 19.21;
 stats games group by player.streaks;
 timeline games;
 plot balance;
